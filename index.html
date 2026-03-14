@@ -1,0 +1,5066 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gaurav's Board</title>
+    <style>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background-color: #111827;
+  color: #111827;
+}
+
+body {
+  display: flex;
+}
+
+.app-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(90deg, #0f172a, #1f2937);
+  color: #f9fafb;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.6);
+  flex-shrink: 0;
+}
+
+.top-bar__title {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.top-bar__spacer {
+  flex: 1;
+}
+
+.top-bar__button {
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: none;
+  background-color: #111827;
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.top-bar__button:hover {
+  background-color: #374151;
+}
+
+.clear-confirm {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: #1f2937;
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid #111827;
+}
+
+.clear-confirm.is-visible {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.clear-confirm__text {
+  margin-right: 0.25rem;
+}
+
+.clear-confirm__btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.clear-confirm__btn--cancel {
+  background: #374151;
+  color: #e5e7eb;
+}
+
+.clear-confirm__btn--cancel:hover {
+  background: #4b5563;
+}
+
+.clear-confirm__btn--clear {
+  background: #dc2626;
+  color: #fff;
+}
+
+.clear-confirm__btn--clear:hover {
+  background: #b91c1c;
+}
+
+.export-dropdown {
+  position: relative;
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+.export-dropdown__menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  min-width: 200px;
+  padding: 0.35rem 0;
+  background: #1f2937;
+  border: 1px solid #111827;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 100;
+}
+
+.export-dropdown.is-open .export-dropdown__menu {
+  display: block;
+}
+
+.export-dropdown__item {
+  display: block;
+  width: 100%;
+  padding: 0.45rem 1rem;
+  border: none;
+  background: none;
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.export-dropdown__item:hover {
+  background: #374151;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: auto 1fr minmax(0, 260px);
+  grid-template-rows: 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.main-layout.no-left {
+  grid-template-columns: 1fr minmax(0, 260px);
+}
+
+.main-layout.no-right {
+  grid-template-columns: auto 1fr;
+}
+
+.main-layout.no-left.no-right {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 900px) {
+  .main-layout {
+    grid-template-columns: auto 1fr;
+  }
+
+  .properties-panel {
+    display: none;
+  }
+}
+
+.tool-bar {
+  display: flex;
+  flex-direction: column;
+  background-color: #020617;
+  padding: 0.5rem;
+  gap: 0.4rem;
+  border-right: 1px solid #111827;
+}
+
+.tool-bar.is-hidden {
+  display: none;
+}
+
+.tool-button {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  background-color: #020617;
+  color: #e5e7eb;
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  min-width: 72px;
+}
+
+.tool-button--active {
+  background: linear-gradient(135deg, #22c55e, #0ea5e9);
+  color: #020617;
+  font-weight: 600;
+}
+
+.tool-bar__spacer {
+  flex: 1;
+}
+
+.tool-bar__bottom-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.canvas-container {
+  position: relative;
+  padding: 0.75rem;
+  background: radial-gradient(circle at top left, #111827 0, #020617 50%);
+  overflow: hidden;
+}
+
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 18px;
+  background-color: #020617;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  touch-action: none;
+}
+
+#boardCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-color: #ffffff;
+  touch-action: none; /* prevent browser scroll/zoom so pen, eraser, shapes work on tablet */
+}
+
+.text-input-anchor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.text-input-anchor.has-input {
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.text-input-anchor .inline-text-input {
+  position: absolute;
+  min-width: 80px;
+  padding: 2px 6px;
+  border: 2px solid #22c55e;
+  border-radius: 6px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.board-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  z-index: 2;
+}
+
+.board-info-label {
+  margin: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background-color: rgba(15, 23, 42, 0.75);
+  color: #e5e7eb;
+}
+
+.properties-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: #020617;
+  border-left: 1px solid #111827;
+  padding: 0.75rem;
+  color: #e5e7eb;
+}
+
+.properties-panel.is-hidden {
+  display: none;
+}
+
+.properties-panel__title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.properties-panel__content {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.tool-options-group {
+  margin-bottom: 0.6rem;
+}
+
+.tool-options-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #e5e7eb;
+  margin-bottom: 0.25rem;
+}
+
+.color-swatch-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+}
+
+/* Keep shape/chart icon buttons square and undistorted on tablet */
+.option-icon-btn {
+  flex-shrink: 0;
+  align-self: center;
+  box-sizing: border-box;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.color-swatch--active {
+  border-color: #facc15;
+}
+
+.slider-input {
+  width: 100%;
+}
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.75rem;
+  background-color: #020617;
+  border-top: 1px solid #111827;
+  color: #e5e7eb;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.bottom-bar__left,
+.bottom-bar__center,
+.bottom-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bottom-bar__button {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background-color: #111827;
+  color: #e5e7eb;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.bottom-bar__button:hover {
+  background-color: #1f2937;
+}
+
+.bottom-bar__label {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.pages-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  overflow-x: auto;
+  max-width: 260px;
+  padding-bottom: 0.15rem;
+}
+
+.page-thumbnail {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background-color: #020617;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.page-thumbnail--active {
+  background-color: #22c55e;
+  color: #020617;
+  font-weight: 600;
+}
+
+.board-type-toggle {
+  display: inline-flex;
+  border-radius: 999px;
+  background-color: #020617;
+  padding: 0.1rem;
+}
+
+.board-type-button {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  background-color: transparent;
+  color: #9ca3af;
+}
+
+.board-type-button--active {
+  background-color: #22c55e;
+  color: #020617;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    padding-inline: 0.6rem;
+  }
+
+  .top-bar__title {
+    font-size: 1rem;
+  }
+
+  .tool-button {
+    padding-inline: 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .bottom-bar {
+    flex-wrap: wrap;
+  }
+
+  .pages-strip {
+    max-width: 180px;
+  }
+}
+
+
+</style>
+  </head>
+  <body>
+    <div id="app-root" class="app-root">
+      <header class="top-bar">
+        <div class="top-bar__title">Gaurav's Board</div>
+        <div class="top-bar__spacer"></div>
+        <button class="top-bar__button" id="clearPageButton" title="Clear everything on this page">
+          Clear page
+        </button>
+        <button class="top-bar__button" id="deletePageButton" title="Delete this page">
+          Delete page
+        </button>
+        <div class="export-dropdown" id="exportDropdown">
+          <button type="button" class="top-bar__button" id="exportButton" title="Export options">
+            Export ▾
+          </button>
+          <div class="export-dropdown__menu" id="exportMenu" aria-hidden="true">
+            <button type="button" class="export-dropdown__item" id="exportFullPage">Full page (PNG)</button>
+            <button type="button" class="export-dropdown__item" id="exportCurrentView">Current view (PNG)</button>
+            <button type="button" class="export-dropdown__item" id="exportSelection">Selection only (PNG)</button>
+            <button type="button" class="export-dropdown__item" id="exportPDF">PDF (all pages)</button>
+          </div>
+        </div>
+        <button class="top-bar__button" id="zoomResetButton" title="Reset zoom to 100%">
+          Reset zoom
+        </button>
+        <button class="top-bar__button" id="toggleLeftPanelButton" title="Hide or show tools panel">
+          Toggle tools
+        </button>
+        <button class="top-bar__button" id="toggleRightPanelButton" title="Hide or show options panel">
+          Toggle options
+        </button>
+        <button class="top-bar__button" id="settingsButton" title="Settings">
+          Settings
+        </button>
+        <button class="top-bar__button" id="fullScreenButton" title="Enter full screen">
+          Full screen
+        </button>
+      </header>
+      <div id="clearPageConfirm" class="clear-confirm" aria-hidden="true">
+        <span class="clear-confirm__text">Clear everything on this page? You can Undo to restore.</span>
+        <button type="button" class="clear-confirm__btn clear-confirm__btn--cancel" id="clearPageCancel">Cancel</button>
+        <button type="button" class="clear-confirm__btn clear-confirm__btn--clear" id="clearPageConfirmBtn">Clear page</button>
+      </div>
+      <div id="deletePageConfirm" class="clear-confirm" aria-hidden="true">
+        <span class="clear-confirm__text">Delete this page permanently? This cannot be undone.</span>
+        <button type="button" class="clear-confirm__btn clear-confirm__btn--cancel" id="deletePageCancel">Cancel</button>
+        <button type="button" class="clear-confirm__btn clear-confirm__btn--clear" id="deletePageConfirmBtn">Delete page</button>
+      </div>
+
+      <main class="main-layout">
+        <aside class="tool-bar">
+          <button class="tool-button tool-button--active" data-tool="select">Pointer</button>
+          <button class="tool-button" data-tool="pen">Pen</button>
+          <button class="tool-button" data-tool="highlighter">Highlighter</button>
+          <button class="tool-button" data-tool="eraser">Eraser</button>
+          <button class="tool-button" data-tool="shapes">Shapes</button>
+          <button class="tool-button" data-tool="text">Text</button>
+          <button class="tool-button" data-tool="notes">Sticky notes</button>
+          <button class="tool-button" data-tool="math">Symbols</button>
+          <button class="tool-button" data-tool="charts">Charts</button>
+          <button class="tool-button" data-tool="stamps">Images</button>
+
+          <div class="tool-bar__spacer"></div>
+
+          <div class="tool-bar__bottom-group">
+            <button class="tool-button" id="undoButton">Undo</button>
+            <button class="tool-button" id="redoButton">Redo</button>
+          </div>
+        </aside>
+
+        <section class="canvas-container">
+          <div class="canvas-wrapper">
+            <canvas id="boardCanvas"></canvas>
+            <div id="textInputAnchor" class="text-input-anchor" aria-hidden="true"></div>
+            <div class="board-overlay">
+              <span id="boardInfoLabel" class="board-info-label">
+                Whiteboard - Page 1
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="properties-panel" id="propertiesPanel">
+          <h2 class="properties-panel__title">Tool Options</h2>
+          <div id="propertiesContent" class="properties-panel__content">
+            <p>Select a tool to see its options.</p>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="bottom-bar">
+        <div class="bottom-bar__left">
+          <button class="bottom-bar__button" id="addPageButton">+ Page</button>
+          <div class="pages-strip" id="pagesStrip">
+            <button class="page-thumbnail page-thumbnail--active">1</button>
+          </div>
+        </div>
+
+        <div class="bottom-bar__center">
+          <span class="bottom-bar__label">Board type:</span>
+          <div class="board-type-toggle" id="boardTypeToggle">
+            <button
+              class="board-type-button board-type-button--active"
+              data-board="white"
+            >
+              Whiteboard
+            </button>
+            <button class="board-type-button" data-board="black">
+              Blackboard
+            </button>
+            <button class="board-type-button" data-board="green">
+              Green board
+            </button>
+          </div>
+        </div>
+
+        <div class="bottom-bar__right">
+          <button class="bottom-bar__button" id="zoomOutButton">-</button>
+          <span id="zoomLabel" class="bottom-bar__label">100%</span>
+          <button class="bottom-bar__button" id="zoomInButton">+</button>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+(() => {
+  const boardCanvas = document.getElementById("boardCanvas");
+  const boardInfoLabel = document.getElementById("boardInfoLabel");
+  const boardTypeToggle = document.getElementById("boardTypeToggle");
+  const zoomLabel = document.getElementById("zoomLabel");
+  const zoomInButton = document.getElementById("zoomInButton");
+  const zoomOutButton = document.getElementById("zoomOutButton");
+  const zoomResetButton = document.getElementById("zoomResetButton");
+  const pagesStrip = document.getElementById("pagesStrip");
+  const addPageButton = document.getElementById("addPageButton");
+  const propertiesContent = document.getElementById("propertiesContent");
+  const mainLayout = document.querySelector(".main-layout");
+  const leftPanel = document.querySelector(".tool-bar");
+  const rightPanel = document.getElementById("propertiesPanel");
+  const toggleLeftPanelButton = document.getElementById("toggleLeftPanelButton");
+  const toggleRightPanelButton = document.getElementById("toggleRightPanelButton");
+  const fullScreenButton = document.getElementById("fullScreenButton");
+  const appRoot = document.getElementById("app-root");
+  const toolButtons = Array.from(
+    document.querySelectorAll(".tool-button[data-tool]")
+  );
+
+  let currentBoardType = "white";
+  let zoom = 1;
+  let currentPageIndex = 0;
+  let currentTool = "select";
+  const pages = [{ strokes: [], shapes: [], texts: [], background: null }];
+  let isDrawing = false;
+  let activeStroke = null;
+  let eraserRadius = 18;
+  const textSettings = {
+    color: "#0f172a",
+    fontSize: 32,
+    fontFamily: "Arial",
+    bold: false,
+    italic: false,
+    underline: false,
+  };
+  const FONT_OPTIONS = ["Arial", "Helvetica", "Times New Roman", "Georgia", "Courier New", "Verdana"];
+  function generateId() {
+    return "id-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+  }
+  const imageCache = new Map();
+  let imageFileInput = null;
+  let shapeImageFileInput = null;
+  let selectedTexts = [];
+  let styleClipboard = { shapeStyle: null, textStyle: null };
+  let dragTextOriginals = null;
+  const penSettings = {
+    color: "#0f172a",
+    width: 3,
+  };
+  const highlighterSettings = {
+    color: "#facc15",
+    width: 10,
+    alpha: 0.4,
+  };
+  const shapeSettings = {
+    type: "rectangle",
+    color: "#0f172a",
+    width: 2,
+    fillMode: "hollow", // hollow | solid
+  };
+  const stickyNotesSettings = {
+    color: "#fef08a",
+    maxWidth: 220,
+  };
+  const chartSettings = {
+    type: "barChart", // barChart | pieChart | horizontalBarChart | pictograph
+  };
+
+  const USER_STAMPS_KEY = "gauravBoardUserStamps";
+  let userStamps = [];
+  let userStampFileInput = null;
+
+  function loadUserStamps() {
+    try {
+      const raw = localStorage.getItem(USER_STAMPS_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed;
+    } catch {
+      return [];
+    }
+  }
+
+  function saveUserStamps() {
+    try {
+      localStorage.setItem(USER_STAMPS_KEY, JSON.stringify(userStamps));
+    } catch {
+      // ignore quota or storage errors
+    }
+  }
+
+  function ensureUserStampFileInput() {
+    if (userStampFileInput) return;
+    userStampFileInput = document.createElement("input");
+    userStampFileInput.type = "file";
+    userStampFileInput.accept = "image/*";
+    userStampFileInput.style.display = "none";
+    document.body.appendChild(userStampFileInput);
+    userStampFileInput.addEventListener("change", () => {
+      const file = userStampFileInput?.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result;
+        if (typeof dataUrl !== "string") return;
+        const label = file.name.replace(/\.[^.]+$/, "") || "Stamp";
+        userStamps.push({
+          id: "stamp-" + Date.now(),
+          label,
+          dataUrl,
+        });
+        saveUserStamps();
+        if (currentTool === "stamps" && propertiesContent) {
+          handleToolSelection("stamps");
+        }
+      };
+      reader.readAsDataURL(file);
+      userStampFileInput.value = "";
+    });
+  }
+
+  userStamps = loadUserStamps();
+
+  function getRandomChartData(chartType) {
+    function rnd(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    if (chartType === "pieChart") {
+      var n = rnd(4, 6);
+      var arr = [];
+      for (var i = 0; i < n; i++) arr.push(rnd(10, 40));
+      return arr;
+    }
+    if (chartType === "pictograph") {
+      var m = rnd(4, 6);
+      var out = [];
+      for (var j = 0; j < m; j++) out.push(rnd(2, 8));
+      return out;
+    }
+    if (chartType === "barChart" || chartType === "horizontalBarChart") {
+      var k = rnd(4, 7);
+      var bars = [];
+      for (var b = 0; b < k; b++) bars.push(rnd(20, 95));
+      return bars;
+    }
+    return [40, 65, 50, 80, 55];
+  }
+
+  let activeShape = null;
+  let selectedShapes = [];
+  let isDraggingShape = false;
+  let dragShapeStartPoint = null;
+  let dragShapeOriginals = null;
+  let dragGroupChildrenOriginals = null;
+  let activeSelectionBox = null;
+  let resizeState = null; // { kind: "shape"|"text", shape?, text?, corner, startBounds?, startBoundsText? }
+  let lastTextTap = { time: 0, item: null };
+  let activeTouchId = null; /* for tablet: track touch so touchmove/touchend use same finger */
+  let pinchStartDistance = null;
+  let pinchStartZoom = 1;
+
+  const MAX_UNDO = 50;
+  const undoStacks = [];
+  const redoStacks = [];
+
+  function ensureUndoStacks(pageIndex) {
+    if (!undoStacks[pageIndex]) undoStacks[pageIndex] = [];
+    if (!redoStacks[pageIndex]) redoStacks[pageIndex] = [];
+  }
+
+  function snapshotPage() {
+    const page = pages[currentPageIndex];
+    if (!page) return { strokes: [], shapes: [], texts: [], background: null };
+    return JSON.parse(
+      JSON.stringify({
+        strokes: page.strokes || [],
+        shapes: page.shapes || [],
+        texts: page.texts || [],
+        background: page.background || null,
+      })
+    );
+  }
+
+  function restorePage(snapshot) {
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    page.strokes = JSON.parse(JSON.stringify(snapshot.strokes || []));
+    page.shapes = JSON.parse(JSON.stringify(snapshot.shapes || []));
+    page.texts = JSON.parse(JSON.stringify(snapshot.texts || []));
+    page.background = JSON.parse(JSON.stringify(snapshot.background || null));
+  }
+
+  function pushUndo() {
+    ensureUndoStacks(currentPageIndex);
+    const snap = snapshotPage();
+    undoStacks[currentPageIndex].push(snap);
+    if (undoStacks[currentPageIndex].length > MAX_UNDO) {
+      undoStacks[currentPageIndex].shift();
+    }
+    redoStacks[currentPageIndex] = [];
+  }
+
+  function undo() {
+    ensureUndoStacks(currentPageIndex);
+    const stack = undoStacks[currentPageIndex];
+    if (stack.length === 0) return;
+    redoStacks[currentPageIndex].push(snapshotPage());
+    restorePage(stack.pop());
+    selectedShapes = [];
+    updateBoardAppearance();
+  }
+
+  function redo() {
+    ensureUndoStacks(currentPageIndex);
+    const stack = redoStacks[currentPageIndex];
+    if (stack.length === 0) return;
+    undoStacks[currentPageIndex].push(snapshotPage());
+    restorePage(stack.pop());
+    updateBoardAppearance();
+  }
+
+  function resizeCanvas() {
+    if (!boardCanvas) return;
+    const rect = boardCanvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio || 1;
+    boardCanvas.width = rect.width * scale;
+    boardCanvas.height = rect.height * scale;
+  }
+
+  function updateBoardAppearance() {
+    if (!boardCanvas) return;
+    const ctx = boardCanvas.getContext("2d");
+    if (!ctx) return;
+
+    const scale = window.devicePixelRatio || 1;
+    ctx.setTransform(scale * zoom, 0, 0, scale * zoom, 0, 0);
+
+    let backgroundColor = "#ffffff";
+    switch (currentBoardType) {
+      case "black":
+        backgroundColor = "#020617";
+        break;
+      case "green":
+        backgroundColor = "#064e3b";
+        break;
+    }
+
+    ctx.fillStyle = backgroundColor;
+    const logicalW = boardCanvas.width / (window.devicePixelRatio || 1);
+    const logicalH = boardCanvas.height / (window.devicePixelRatio || 1);
+    ctx.fillRect(0, 0, logicalW, logicalH);
+
+    boardCanvas.style.backgroundColor = backgroundColor;
+
+    const page = pages[currentPageIndex];
+    if (page && page.background && page.background.dataUrl) {
+      const img = getCachedImage(page.background.dataUrl);
+      if (img && img.complete) {
+        const iw = img.width;
+        const ih = img.height;
+        if (iw > 0 && ih > 0) {
+          const scale = Math.min(logicalW / iw, logicalH / ih);
+          const dw = iw * scale;
+          const dh = ih * scale;
+          const dx = (logicalW - dw) / 2;
+          const dy = (logicalH - dh) / 2;
+          ctx.drawImage(img, dx, dy, dw, dh);
+        }
+      }
+    }
+
+    drawAllStrokes(ctx);
+  }
+
+  function getBoardBackgroundColor() {
+    switch (currentBoardType) {
+      case "black": return "#020617";
+      case "green": return "#4ade80"; // even lighter green for green board
+      default: return "#ffffff";
+    }
+  }
+
+  function showInlineTextInput(logicalPoint, isSticky) {
+    if (!boardCanvas) return;
+    let anchor = document.getElementById("textInputAnchor");
+    if (!anchor && boardCanvas.parentElement) {
+      anchor = document.createElement("div");
+      anchor.id = "textInputAnchor";
+      anchor.className = "text-input-anchor";
+      boardCanvas.parentElement.appendChild(anchor);
+    }
+    if (!anchor) return;
+    anchor.innerHTML = "";
+    const rect = boardCanvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio || 1;
+    let logicalW = boardCanvas.width / (scale * zoom);
+    let logicalH = boardCanvas.height / (scale * zoom);
+    if (logicalW <= 0) logicalW = rect.width;
+    if (logicalH <= 0) logicalH = rect.height;
+    const leftPx = Math.max(0, Math.min(rect.width - 100, (logicalPoint.x / logicalW) * rect.width));
+    const topPx = Math.max(0, Math.min(rect.height - 40, (logicalPoint.y / logicalH) * rect.height));
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "inline-text-input";
+    input.placeholder = "Type here...";
+    const fs = Math.max(12, textSettings.fontSize * zoom);
+    input.style.cssText = [
+      "left:" + leftPx + "px",
+      "top:" + topPx + "px",
+      "font-size:" + fs + "px",
+      "font-family:" + (textSettings.fontFamily || "Arial"),
+      "font-weight:" + (textSettings.bold ? "700" : "400"),
+      "font-style:" + (textSettings.italic ? "italic" : "normal"),
+      "text-decoration:" + (textSettings.underline ? "underline" : "none"),
+      "color:#0f172a",
+      "background:#ffffff",
+      "min-width:80px",
+      "width:160px",
+    ].join("; ");
+    input.addEventListener("click", (e) => e.stopPropagation());
+    input.addEventListener("pointerdown", (e) => e.stopPropagation());
+    function commit() {
+      const text = (input.value || "").trim();
+      const page = pages[currentPageIndex];
+      if (page && page.texts && text !== "") {
+        const newItem = {
+          id: generateId(),
+          x: logicalPoint.x,
+          y: logicalPoint.y,
+          text: text,
+          color: textSettings.color,
+          fontSize: textSettings.fontSize,
+          fontFamily: textSettings.fontFamily,
+          bold: textSettings.bold,
+          italic: textSettings.italic,
+          underline: textSettings.underline,
+          sticky: !!isSticky,
+          stickyColor: isSticky ? stickyNotesSettings.color : undefined,
+        };
+        page.texts.push(newItem);
+        currentTool = "select";
+        selectedShapes = [];
+        selectedTexts = [newItem];
+        toolButtons.forEach((btn) => {
+          const isActive = btn.getAttribute("data-tool") === "select";
+          btn.classList.toggle("tool-button--active", isActive);
+        });
+        if (propertiesContent) handleToolSelection("select");
+      }
+      if (anchor) {
+        anchor.innerHTML = "";
+        anchor.classList.remove("has-input");
+        anchor.style.touchAction = "";
+      }
+      updateBoardAppearance();
+    }
+    input.addEventListener("blur", () => setTimeout(commit, 0));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+    anchor.appendChild(input);
+    anchor.classList.add("has-input");
+    anchor.style.zIndex = "10";
+    anchor.style.touchAction = "auto";
+    requestAnimationFrame(() => {
+      input.focus();
+    });
+  }
+
+  function openEditTextInput(item) {
+    if (!boardCanvas || !item) return;
+    let anchor = document.getElementById("textInputAnchor");
+    if (!anchor && boardCanvas.parentElement) {
+      anchor = document.createElement("div");
+      anchor.id = "textInputAnchor";
+      anchor.className = "text-input-anchor";
+      boardCanvas.parentElement.appendChild(anchor);
+    }
+    if (!anchor) return;
+    anchor.innerHTML = "";
+    const rect = boardCanvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio || 1;
+    let logicalW = boardCanvas.width / (scale * zoom);
+    let logicalH = boardCanvas.height / (scale * zoom);
+    if (logicalW <= 0) logicalW = rect.width;
+    if (logicalH <= 0) logicalH = rect.height;
+    const b = getTextBounds(item);
+    const leftPx = Math.max(0, Math.min(rect.width - 100, (b.x / logicalW) * rect.width));
+    const topPx = Math.max(0, Math.min(rect.height - 40, (b.y / logicalH) * rect.height));
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "inline-text-input";
+    input.value = item.text || "";
+    const fs = Math.max(12, (item.fontSize || 24) * zoom);
+    input.style.cssText = [
+      "left:" + leftPx + "px",
+      "top:" + topPx + "px",
+      "font-size:" + fs + "px",
+      "font-family:" + (item.fontFamily || "Arial"),
+      "font-weight:" + (item.bold ? "700" : "400"),
+      "font-style:" + (item.italic ? "italic" : "normal"),
+      "text-decoration:" + (item.underline ? "underline" : "none"),
+      "color:" + (item.color || "#0f172a"),
+      "min-width:80px",
+    ].join("; ");
+    input.style.width = Math.max(160, b.w + 40) + "px";
+    input.addEventListener("click", (e) => e.stopPropagation());
+    input.addEventListener("pointerdown", (e) => e.stopPropagation());
+    function commit() {
+      const newText = (input.value || "").trim();
+      if (newText !== (item.text || "")) {
+        pushUndo();
+        item.text = newText;
+        updateBoardAppearance();
+      }
+      if (anchor) {
+        anchor.innerHTML = "";
+        anchor.classList.remove("has-input");
+      }
+      updateBoardAppearance();
+    }
+    input.addEventListener("blur", () => setTimeout(commit, 0));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+    anchor.appendChild(input);
+    anchor.classList.add("has-input");
+    anchor.style.zIndex = "10";
+    requestAnimationFrame(() => {
+      input.focus();
+      input.select();
+    });
+  }
+
+  function getCachedImage(dataUrl) {
+    if (!imageCache.has(dataUrl)) {
+      const img = new Image();
+      img.src = dataUrl;
+      imageCache.set(dataUrl, img);
+    }
+    return imageCache.get(dataUrl);
+  }
+
+  function drawGraphBackground(ctx, w, h) {
+    const cx = w / 2;
+    const cy = h / 2;
+    const minorStep = 20;
+    const majorStep = 100;
+    ctx.save();
+    // minor grid
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.35)";
+    ctx.lineWidth = 0.5;
+    for (let x = cx; x < w; x += minorStep) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let x = cx - minorStep; x >= 0; x -= minorStep) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let y = cy; y < h; y += minorStep) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    for (let y = cy - minorStep; y >= 0; y -= minorStep) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    // major grid
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.8)";
+    ctx.lineWidth = 0.9;
+    for (let x = cx; x < w; x += majorStep) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let x = cx - majorStep; x >= 0; x -= majorStep) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let y = cy; y < h; y += majorStep) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    for (let y = cy - majorStep; y >= 0; y -= majorStep) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    // axes
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(cx, 0);
+    ctx.lineTo(cx, h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, cy);
+    ctx.lineTo(w, cy);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawPageContent(ctx, backgroundColor) {
+    const page = pages[currentPageIndex];
+    ctx.fillStyle = backgroundColor;
+    const w = boardCanvas ? boardCanvas.width / (window.devicePixelRatio || 1) / zoom : 800;
+    const h = boardCanvas ? boardCanvas.height / (window.devicePixelRatio || 1) / zoom : 600;
+    ctx.fillRect(0, 0, w, h);
+    if (!page) return;
+
+    // 1) Special backgrounds, otherwise optional background image
+    if (currentTool === "graphs") {
+      drawGraphBackground(ctx, w, h);
+    } else if (page.background && page.background.dataUrl) {
+      const img = getCachedImage(page.background.dataUrl);
+      if (img && img.complete) {
+        const iw = img.width;
+        const ih = img.height;
+        if (iw > 0 && ih > 0) {
+          const scale = Math.min(w / iw, h / ih);
+          const dw = iw * scale;
+          const dh = ih * scale;
+          const dx = (w - dw) / 2;
+          const dy = (h - dh) / 2;
+          ctx.drawImage(img, dx, dy, dw, dh);
+        }
+      }
+    }
+
+    // 2) Draw all shapes (including image shapes) and text first
+    if (page.shapes) {
+      page.shapes.forEach((shape) => drawShape(ctx, shape, false));
+    }
+    if (page.texts) {
+      page.texts.forEach((item) => drawTextItem(ctx, item, false));
+    }
+
+    // 3) Draw strokes (pen / highlighter) LAST so they always appear over images and shapes
+    page.strokes.forEach((stroke) => {
+      const points = stroke.points;
+      if (!points || points.length < 2) return;
+      ctx.save();
+      ctx.globalAlpha = stroke.alpha ?? 1;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.width ?? 3;
+      ctx.beginPath();
+      drawSmoothStrokePath(ctx, points);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function getTextFontString(item) {
+    const fs = item.fontSize ?? 24;
+    const style = item.italic ? "italic " : "";
+    const weight = item.bold ? "bold " : "";
+    const family = item.fontFamily ?? "Arial";
+    return `${style}${weight}${fs}px ${family}`;
+  }
+
+  function wrapStickyTextWithCtx(ctx, text, fontSize, maxWidth) {
+    const fs = fontSize ?? 24;
+    if (!text || !text.trim()) return { lines: [""], width: 20, height: fs };
+    const words = text.split(/\s+/);
+    const lines = [];
+    let current = [];
+    let currentW = 0;
+    for (let i = 0; i < words.length; i++) {
+      const w = ctx.measureText(words[i]).width;
+      if (current.length && currentW + (current.length > 1 ? ctx.measureText(" ").width : 0) + w > maxWidth) {
+        lines.push(current.join(" "));
+        current = [words[i]];
+        currentW = w;
+      } else {
+        if (current.length) currentW += ctx.measureText(" ").width;
+        current.push(words[i]);
+        currentW += w;
+      }
+    }
+    if (current.length) lines.push(current.join(" "));
+    let width = 20;
+    for (const line of lines) {
+      const lw = ctx.measureText(line).width;
+      if (lw > width) width = lw;
+    }
+    return { lines, width, height: lines.length * fs };
+  }
+
+  function wrapStickyText(item, maxWidth) {
+    const text = item.text || "";
+    const fs = item.fontSize ?? 24;
+    if (!text.trim()) return { lines: [""], width: 20, height: fs };
+    const approxCharWidth = fs * 0.55;
+    const words = text.split(/\s+/);
+    const lines = [];
+    let current = [];
+    let currentW = 0;
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      const wordW = word.length * approxCharWidth;
+      if (current.length && currentW + wordW > maxWidth) {
+        lines.push(current.join(" "));
+        current = [word];
+        currentW = wordW;
+      } else {
+        current.push(word);
+        currentW += (current.length > 1 ? 1 : 0) * approxCharWidth + wordW;
+      }
+    }
+    if (current.length) lines.push(current.join(" "));
+    const width = Math.max(20, ...lines.map((l) => l.length * approxCharWidth));
+    const height = lines.length * fs;
+    return { lines, width, height };
+  }
+
+  function drawTextItem(ctx, item, isSelected) {
+    if (!item || item.text == null || item.text === "") return;
+    ctx.save();
+    const fontStr = getTextFontString(item);
+    ctx.font = fontStr;
+    const fs = item.fontSize ?? 24;
+    const pad = 12;
+    const defaultMaxW = stickyNotesSettings.maxWidth ?? 220;
+    const b = getTextBounds(item);
+    const hasExplicitSize = item.w != null && item.h != null && Number(item.w) > 0 && Number(item.h) > 0;
+    const shouldWrap = item.sticky || hasExplicitSize;
+    const wrapWidth = shouldWrap ? Math.max(20, Number(b.w) || Number(item.w) || defaultMaxW) : 0;
+    let wrappedLines = null;
+    if (shouldWrap && wrapWidth > 0 && item.text) {
+      wrappedLines = wrapStickyTextWithCtx(ctx, String(item.text), fs, wrapWidth);
+    }
+    if (item.sticky) {
+      const x1 = b.x - pad;
+      const y1 = b.y - pad;
+      const x2 = b.x + b.w + pad;
+      const y2 = b.y + b.h + pad;
+      const r = 6;
+      const foldSize = 18;
+      ctx.shadowColor = "rgba(0,0,0,0.2)";
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      ctx.fillStyle = item.stickyColor || stickyNotesSettings.color || "#fef08a";
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x1, y1, x2 - x1, y2 - y1, r);
+      } else {
+        ctx.rect(x1, y1, x2 - x1, y2 - y1);
+      }
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = "rgba(0,0,0,0.08)";
+      ctx.beginPath();
+      ctx.moveTo(x2 - foldSize, y1);
+      ctx.lineTo(x2, y1);
+      ctx.lineTo(x2, y1 + foldSize);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0,0,0,0.1)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.fillStyle = item.color ?? "#0f172a";
+    ctx.textBaseline = "top";
+    if (wrappedLines && wrappedLines.lines && wrappedLines.lines.length > 0) {
+      const boxHeight = hasExplicitSize && item.h > 0 ? item.h : 1e9;
+      if (hasExplicitSize && b.w > 0 && b.h > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(b.x, b.y, b.w, b.h);
+        ctx.clip();
+      }
+      for (let i = 0; i < wrappedLines.lines.length; i++) {
+        const ly = item.y + i * fs;
+        if (ly + fs > item.y + boxHeight) break;
+        ctx.fillText(wrappedLines.lines[i], item.x, ly);
+      }
+      if (hasExplicitSize && b.w > 0 && b.h > 0) ctx.restore();
+    } else {
+      ctx.fillText(item.text || "", item.x, item.y);
+    }
+    if (item.underline && !item.sticky) {
+      const m = ctx.measureText(item.text);
+      const underY = item.y + fs + 2;
+      ctx.strokeStyle = item.color ?? "#0f172a";
+      ctx.lineWidth = Math.max(1, Math.round(fs / 16));
+      ctx.beginPath();
+      ctx.moveTo(item.x, underY);
+      ctx.lineTo(item.x + m.width, underY);
+      ctx.stroke();
+    }
+    if (isSelected) {
+      const selPad = item.sticky ? 12 : 4;
+      const boxX = b.x - selPad;
+      const boxY = b.y - selPad;
+      const boxW = b.w + selPad * 2;
+      const boxH = b.h + selPad * 2;
+
+      // selection rectangle
+      ctx.strokeStyle = item.locked ? "#6b7280" : "#eab308";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+      if (item.locked) {
+        item._resizeHandles = undefined;
+        item._duplicateHandle = undefined;
+        item._deleteHandle = undefined;
+        item._lockHandle = undefined;
+        const btnH = 18;
+        const plusPad = 4;
+        const plusSize = 14;
+        const plusX = boxX + boxW + plusPad;
+        const btnX = plusX - 14 - 6 - 14 - 6 - 44;
+        const btnY = boxY - btnH - 4;
+        const btnW = 50;
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#6b7280";
+        ctx.strokeStyle = "#4b5563";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(btnX, btnY, btnW, btnH, 6);
+        else ctx.rect(btnX, btnY, btnW, btnH);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "10px Arial";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Unlock", btnX + 18, btnY + btnH / 2);
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1.2;
+        const cxLock = btnX + 10;
+        const cyLock = btnY + btnH / 2;
+        ctx.beginPath();
+        ctx.arc(cxLock + 1.5, cyLock - 1.5, 2.5, Math.PI * 0.2, Math.PI * 1.2);
+        ctx.stroke();
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(btnX + 2.5, cyLock + 0.5, 5, 3.5, 1);
+        else ctx.rect(btnX + 2.5, cyLock + 0.5, 5, 3.5);
+        ctx.stroke();
+        item._unlockHandle = { x: btnX, y: btnY, w: btnW, h: btnH };
+      } else {
+        const handles = [
+          { corner: "tl", x: boxX, y: boxY },
+          { corner: "tr", x: boxX + boxW, y: boxY },
+          { corner: "br", x: boxX + boxW, y: boxY + boxH },
+          { corner: "bl", x: boxX, y: boxY + boxH },
+        ];
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#eab308";
+        const s = 8;
+        handles.forEach((h) => {
+          ctx.fillRect(h.x - s / 2, h.y - s / 2, s, s);
+        });
+        item._resizeHandles = handles;
+
+        const plusSize = 14;
+        const plusPad = 4;
+        const plusX = boxX + boxW + plusPad;
+        const plusY = boxY - plusSize - plusPad;
+        ctx.fillStyle = "#22c55e";
+        ctx.strokeStyle = "#14532d";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(plusX, plusY, plusSize, plusSize, 4);
+        else ctx.rect(plusX, plusY, plusSize, plusSize);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#022c22";
+        ctx.lineWidth = 2;
+        const cxPlus = plusX + plusSize / 2;
+        const cyPlus = plusY + plusSize / 2;
+        const arm = plusSize * 0.3;
+        ctx.moveTo(cxPlus - arm, cyPlus);
+        ctx.lineTo(cxPlus + arm, cyPlus);
+        ctx.moveTo(cxPlus, cyPlus - arm);
+        ctx.lineTo(cxPlus, cyPlus + arm);
+        ctx.stroke();
+        item._duplicateHandle = { x: plusX, y: plusY, w: plusSize, h: plusSize };
+
+        const delSize = 14;
+        const delPad = 6;
+        const delX = plusX - delSize - delPad;
+        const delY = plusY;
+        ctx.fillStyle = "#dc2626";
+        ctx.strokeStyle = "#7f1d1d";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(delX, delY, delSize, delSize, 4);
+        else ctx.rect(delX, delY, delSize, delSize);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#fef2f2";
+        ctx.lineWidth = 2;
+        const cxDel = delX + delSize / 2;
+        const cyDel = delY + delSize / 2;
+        const armDel = delSize * 0.35;
+        ctx.moveTo(cxDel - armDel, cyDel - armDel);
+        ctx.lineTo(cxDel + armDel, cyDel + armDel);
+        ctx.moveTo(cxDel - armDel, cyDel + armDel);
+        ctx.lineTo(cxDel + armDel, cyDel - armDel);
+        ctx.stroke();
+        item._deleteHandle = { x: delX, y: delY, w: delSize, h: delSize };
+
+        const lockSize = 14;
+        const lockPad = 6;
+        const lockX = delX - lockSize - lockPad;
+        const lockY = delY;
+        ctx.fillStyle = "#4b5563";
+        ctx.strokeStyle = "#374151";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(lockX, lockY, lockSize, lockSize, 4);
+        else ctx.rect(lockX, lockY, lockSize, lockSize);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1.5;
+        const cxLock = lockX + lockSize / 2;
+        const cyLock = lockY + lockSize / 2;
+        ctx.beginPath();
+        ctx.arc(cxLock, cyLock - 1.5, 3, Math.PI * 0.5, Math.PI * 1.5);
+        ctx.stroke();
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(lockX + 3.5, cyLock + 1, 7, 4.5, 1);
+        else ctx.rect(lockX + 3.5, cyLock + 1, 7, 4.5);
+        ctx.stroke();
+        item._lockHandle = { x: lockX, y: lockY, w: lockSize, h: lockSize };
+      }
+    }
+    ctx.restore();
+  }
+
+  function exportPageAsPNG() {
+    const scale = window.devicePixelRatio || 1;
+    const logicalW = boardCanvas ? boardCanvas.width / (scale * zoom) : 800;
+    const logicalH = boardCanvas ? boardCanvas.height / (scale * zoom) : 600;
+    const exportScale = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = logicalW * exportScale;
+    canvas.height = logicalH * exportScale;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.scale(exportScale, exportScale);
+    drawPageContent(ctx, getBoardBackgroundColor());
+    const dataUrl = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `Gauravs-Board-page-${currentPageIndex + 1}.png`;
+    a.click();
+  }
+
+  /** Draw a specific page to ctx (for export). w,h in logical units. No connectors. */
+  function drawPageContentForExport(ctx, pageIndex, w, h, backgroundColor) {
+    const page = pages[pageIndex];
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, w, h);
+    if (!page) return;
+    if (page.background && page.background.dataUrl) {
+      const img = getCachedImage(page.background.dataUrl);
+      if (img && img.complete) {
+        const iw = img.width;
+        const ih = img.height;
+        if (iw > 0 && ih > 0) {
+          const scale = Math.min(w / iw, h / ih);
+          const dw = iw * scale;
+          const dh = ih * scale;
+          const dx = (w - dw) / 2;
+          const dy = (h - dh) / 2;
+          ctx.drawImage(img, dx, dy, dw, dh);
+        }
+      }
+    }
+    if (page.shapes) {
+      page.shapes.forEach((shape) => drawShape(ctx, shape, false));
+    }
+    if (page.texts) {
+      page.texts.forEach((item) => drawTextItem(ctx, item, false));
+    }
+    (page.strokes || []).forEach((stroke) => {
+      const points = stroke.points;
+      if (!points || points.length < 2) return;
+      ctx.save();
+      ctx.globalAlpha = stroke.alpha ?? 1;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.width ?? 3;
+      ctx.beginPath();
+      drawSmoothStrokePath(ctx, points);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function getSelectionBounds() {
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    const page = pages[currentPageIndex];
+    if (!page) return null;
+    selectedShapes.forEach((shape) => {
+      if (!shape.start || !shape.end) return;
+      const sx1 = Math.min(shape.start.x, shape.end.x);
+      const sy1 = Math.min(shape.start.y, shape.end.y);
+      const sx2 = Math.max(shape.start.x, shape.end.x);
+      const sy2 = Math.max(shape.start.y, shape.end.y);
+      x1 = Math.min(x1, sx1);
+      y1 = Math.min(y1, sy1);
+      x2 = Math.max(x2, sx2);
+      y2 = Math.max(y2, sy2);
+    });
+    selectedTexts.forEach((item) => {
+      const b = getTextBounds(item);
+      x1 = Math.min(x1, b.x);
+      y1 = Math.min(y1, b.y);
+      x2 = Math.max(x2, b.x + b.w);
+      y2 = Math.max(y2, b.y + b.h);
+    });
+    if (x1 === Infinity || y1 === Infinity) return null;
+    return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+  }
+
+  function exportCurrentViewAsPNG() {
+    const container = boardCanvas.closest(".canvas-container");
+    const scale = window.devicePixelRatio || 1;
+    const logicalW = boardCanvas ? boardCanvas.width / (scale * zoom) : 800;
+    const logicalH = boardCanvas ? boardCanvas.height / (scale * zoom) : 600;
+    const scrollTop = container ? container.scrollTop : 0;
+    const viewHeight = container ? container.clientHeight : 600;
+    const viewWidth = container ? container.clientWidth : logicalW;
+    const logicalViewY = scrollTop / zoom;
+    const logicalViewH = viewHeight / zoom;
+    const logicalViewW = Math.min(logicalW, viewWidth / zoom);
+    const exportScale = 2;
+    const fullCanvas = document.createElement("canvas");
+    fullCanvas.width = logicalW * exportScale;
+    fullCanvas.height = logicalH * exportScale;
+    const fullCtx = fullCanvas.getContext("2d");
+    if (!fullCtx) return;
+    fullCtx.scale(exportScale, exportScale);
+    drawPageContent(fullCtx, getBoardBackgroundColor());
+    const outCanvas = document.createElement("canvas");
+    outCanvas.width = logicalViewW * exportScale;
+    outCanvas.height = logicalViewH * exportScale;
+    const outCtx = outCanvas.getContext("2d");
+    if (!outCtx) return;
+    outCtx.drawImage(
+      fullCanvas,
+      0, logicalViewY * exportScale, logicalViewW * exportScale, logicalViewH * exportScale,
+      0, 0, outCanvas.width, outCanvas.height
+    );
+    const dataUrl = outCanvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `Gauravs-Board-view-page-${currentPageIndex + 1}.png`;
+    a.click();
+  }
+
+  function exportSelectionAsPNG() {
+    const bounds = getSelectionBounds();
+    if (!bounds || (selectedShapes.length === 0 && selectedTexts.length === 0)) {
+      alert("Select one or more shapes or text items first.");
+      return;
+    }
+    const pad = 16;
+    const exportScale = 2;
+    const w = (bounds.w + pad * 2) * exportScale;
+    const h = (bounds.h + pad * 2) * exportScale;
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.scale(exportScale, exportScale);
+    ctx.translate(pad - bounds.x, pad - bounds.y);
+    ctx.fillStyle = getBoardBackgroundColor();
+    ctx.fillRect(bounds.x, bounds.y, bounds.w, bounds.h);
+    selectedShapes.forEach((shape) => drawShape(ctx, shape, false));
+    selectedTexts.forEach((item) => drawTextItem(ctx, item, false));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const dataUrl = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `Gauravs-Board-selection.png`;
+    a.click();
+  }
+
+  function exportToPDF() {
+    if (typeof jspdf !== "undefined" && jspdf.jsPDF) {
+      doExportToPDF();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    script.onload = () => {
+      doExportToPDF();
+    };
+    script.onerror = () => {
+      alert("Could not load PDF library. Check your internet connection.");
+    };
+    document.head.appendChild(script);
+  }
+
+  function doExportToPDF() {
+    const scale = window.devicePixelRatio || 1;
+    const logicalW = boardCanvas ? boardCanvas.width / (scale * zoom) : 800;
+    const logicalH = boardCanvas ? boardCanvas.height / (scale * zoom) : 600;
+    const exportScale = 2;
+    const orientation = logicalW > logicalH ? "landscape" : "portrait";
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation,
+      unit: "pt",
+      format: "a4",
+    });
+    const pdfW = pdf.internal.pageSize.getWidth();
+    const pdfH = pdf.internal.pageSize.getHeight();
+    const scaleToFit = Math.min(pdfW / logicalW, pdfH / logicalH);
+    const drawW = logicalW * scaleToFit;
+    const drawH = logicalH * scaleToFit;
+    const offsetX = (pdfW - drawW) / 2;
+    const offsetY = (pdfH - drawH) / 2;
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = logicalW * exportScale;
+    tempCanvas.height = logicalH * exportScale;
+    const tempCtx = tempCanvas.getContext("2d");
+    if (!tempCtx) return;
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage("a4", orientation);
+      tempCtx.setTransform(1, 0, 0, 1, 0, 0);
+      tempCtx.scale(exportScale, exportScale);
+      const bg = getBoardBackgroundColor();
+      drawPageContentForExport(tempCtx, i, logicalW, logicalH, bg);
+      const imgData = tempCanvas.toDataURL("image/png");
+      pdf.addImage(imgData, "PNG", offsetX, offsetY, drawW, drawH);
+    }
+    pdf.save("Gauravs-Board.pdf");
+  }
+
+  function drawAllStrokes(ctx) {
+    const page = pages[currentPageIndex];
+    if (!page) return;
+
+    page.strokes.forEach((stroke) => {
+      const points = stroke.points;
+      if (!points || points.length < 2) return;
+
+      ctx.save();
+      ctx.globalAlpha = stroke.alpha ?? 1;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.width ?? 3;
+
+      ctx.beginPath();
+      drawSmoothStrokePath(ctx, points);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    if (page.shapes && page.shapes.length) {
+      page.shapes.forEach((shape) => {
+        drawShape(ctx, shape, false);
+      });
+    }
+
+    if (page.texts && page.texts.length) {
+      page.texts.forEach((item) => {
+        drawTextItem(ctx, item, selectedTexts.includes(item));
+      });
+    }
+
+    if (activeShape) {
+      drawShape(ctx, activeShape, true);
+    }
+
+    if (activeSelectionBox) {
+      const { start, end } = activeSelectionBox;
+      const x = Math.min(start.x, end.x);
+      const y = Math.min(start.y, end.y);
+      const w = Math.abs(end.x - start.x);
+      const h = Math.abs(end.y - start.y);
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+    }
+  }
+
+  function drawShape(ctx, shape, isPreview) {
+    const { start, end } = shape;
+    if (!start || !end) return;
+
+    const type = shape.type;
+    if (type === "group") {
+      if (shape.children) {
+        (shape.children.shapes || []).forEach((s) => drawShape(ctx, s, false));
+        (shape.children.texts || []).forEach((t) => drawTextItem(ctx, t, false));
+      }
+      return;
+    }
+
+    ctx.save();
+    if (isPreview) {
+      ctx.setLineDash([6, 4]);
+    }
+    ctx.globalAlpha = 1;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = shape.color;
+    ctx.lineWidth = shape.width ?? 2;
+    ctx.fillStyle = shape.fillMode === "solid" ? shape.color : "transparent";
+    ctx.beginPath();
+
+    const x1 = Math.min(start.x, end.x);
+    const y1 = Math.min(start.y, end.y);
+    const x2 = Math.max(start.x, end.x);
+    const y2 = Math.max(start.y, end.y);
+    const cx = (x1 + x2) / 2;
+    const cy = (y1 + y2) / 2;
+    const w = x2 - x1 || 1;
+    const h = y2 - y1 || 1;
+    const r = Math.min(w, h) / 2;
+
+    if (type === "line" || type === "ray") {
+      ctx.moveTo(start.x, start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+
+      if (type === "ray") {
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const ux = dx / len;
+        const uy = dy / len;
+        const headLength = 10 + (shape.width ?? 2) * 1.5;
+        const hx = end.x - ux * headLength;
+        const hy = end.y - uy * headLength;
+        ctx.beginPath();
+        ctx.moveTo(end.x, end.y);
+        ctx.lineTo(hx - uy * (headLength / 2), hy + ux * (headLength / 2));
+        ctx.moveTo(end.x, end.y);
+        ctx.lineTo(hx + uy * (headLength / 2), hy - ux * (headLength / 2));
+        ctx.stroke();
+      }
+    } else if (type === "rectangle") {
+      ctx.rect(x1, y1, w, h);
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "circle") {
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const rad = Math.sqrt(dx * dx + dy * dy);
+      ctx.arc(start.x, start.y, rad, 0, Math.PI * 2);
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "triangle") {
+      const midX = (x1 + x2) / 2;
+      ctx.moveTo(midX, y1);
+      ctx.lineTo(x1, y2);
+      ctx.lineTo(x2, y2);
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "rhombus" || type === "diamond") {
+      ctx.moveTo(cx, y1);
+      ctx.lineTo(x2, cy);
+      ctx.lineTo(cx, y2);
+      ctx.lineTo(x1, cy);
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "parallelogram") {
+      const skew = w * 0.25;
+      ctx.moveTo(x1 + skew, y1);
+      ctx.lineTo(x2 + skew, y1);
+      ctx.lineTo(x2 - skew, y2);
+      ctx.lineTo(x1 - skew, y2);
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "trapezium") {
+      const topInset = w * 0.2;
+      const topLeft = x1 + topInset;
+      const topRight = x2 - topInset;
+      ctx.moveTo(topLeft, y1);
+      ctx.lineTo(topRight, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(x1, y2);
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "pentagon") {
+      for (let k = 0; k < 5; k++) {
+        const angle = -Math.PI / 2 + (2 * Math.PI * k) / 5;
+        const px = cx + r * Math.cos(angle);
+        const py = cy + r * Math.sin(angle);
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "hexagon") {
+      for (let k = 0; k < 6; k++) {
+        const angle = (Math.PI / 2) - (2 * Math.PI * k) / 6;
+        const px = cx + r * Math.cos(angle);
+        const py = cy + r * Math.sin(angle);
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "star") {
+      const innerR = r * 0.4;
+      for (let k = 0; k < 10; k++) {
+        const angle = -Math.PI / 2 + (Math.PI * k) / 5;
+        const rad = k % 2 === 0 ? r : innerR;
+        const px = cx + rad * Math.cos(angle);
+        const py = cy + rad * Math.sin(angle);
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "cube" || type === "cuboid") {
+      const depth = Math.min(w, h) * 0.35;
+      const dx = depth;
+      const dy = -depth * 0.6;
+
+      // fill front face
+      if (shape.fillMode === "solid") {
+        ctx.beginPath();
+        ctx.rect(x1, y1, w, h);
+        ctx.fill();
+      }
+
+      // outline front face
+      ctx.beginPath();
+      ctx.rect(x1, y1, w, h);
+      ctx.stroke();
+
+      // back face
+      ctx.beginPath();
+      ctx.moveTo(x1 + dx, y1 + dy);
+      ctx.lineTo(x2 + dx, y1 + dy);
+      ctx.lineTo(x2 + dx, y2 + dy);
+      ctx.lineTo(x1 + dx, y2 + dy);
+      ctx.closePath();
+      ctx.stroke();
+
+      // connectors
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 + dx, y1 + dy);
+      ctx.moveTo(x2, y1);
+      ctx.lineTo(x2 + dx, y1 + dy);
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 + dx, y2 + dy);
+      ctx.moveTo(x1, y2);
+      ctx.lineTo(x1 + dx, y2 + dy);
+      ctx.stroke();
+    } else if (type === "cylinder") {
+      const rx = w / 2;
+      const ry = Math.max(4, h * 0.15);
+      const topY = y1 + ry;
+      const bottomY = y2 - ry;
+      ctx.save();
+      // body fill
+      if (shape.fillMode === "solid") {
+        ctx.beginPath();
+        ctx.rect(x1, topY, w, bottomY - topY);
+        ctx.fill();
+      }
+      // top ellipse (full)
+      ctx.beginPath();
+      ctx.ellipse(cx, topY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      // sides
+      ctx.beginPath();
+      ctx.moveTo(x1, topY);
+      ctx.lineTo(x1, bottomY);
+      ctx.moveTo(x2, topY);
+      ctx.lineTo(x2, bottomY);
+      ctx.stroke();
+      // bottom ellipse: full visible circle for clearer 3D look
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.ellipse(cx, bottomY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    } else if (type === "cone") {
+      const rx = w / 2;
+      const ry = Math.max(4, w * 0.25);
+      const baseY = y2;
+      // fill body using triangle (apex to base)
+      if (shape.fillMode === "solid") {
+        ctx.beginPath();
+        ctx.moveTo(cx, y1);
+        ctx.lineTo(x1, baseY);
+        ctx.lineTo(x2, baseY);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // outline only the two slant edges (no straight bottom line)
+      ctx.beginPath();
+      ctx.moveTo(cx, y1);
+      ctx.lineTo(x1, baseY);
+      ctx.moveTo(cx, y1);
+      ctx.lineTo(x2, baseY);
+      ctx.stroke();
+      // base ellipse centred on base line
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.ellipse(cx, baseY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (type === "sphere") {
+      const rad = Math.min(w, h) / 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rad, rad * 0.45, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (type === "pie3d") {
+      const rad = Math.min(w, h) / 2;
+      const sliceAngle = Math.PI * 0.6; // 108Â°
+      const startAngle = -Math.PI / 2;
+      const endAngle = startAngle + sliceAngle;
+      // outer circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.stroke();
+      // slice
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, rad, startAngle, endAngle);
+      ctx.closePath();
+      if (shape.fillMode === "solid") ctx.fill();
+      ctx.stroke();
+    } else if (type === "barChart") {
+      const data = shape.data || [40, 65, 50, 80, 55];
+      const padL = 40;
+      const padR = 20;
+      const padT = 25;
+      const padB = 35;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+      if (chartW <= 0 || chartH <= 0) { ctx.restore(); return; }
+      const maxVal = Math.max(...data, 1);
+      const n = data.length;
+      const barW = Math.max(8, (chartW / n) * 0.6);
+      const gap = (chartW - n * barW) / (n + 1);
+      ctx.save();
+      ctx.strokeStyle = shape.color || "#374151";
+      ctx.fillStyle = shape.color || "#374151";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x1 + padL, y1 + padT, chartW, chartH);
+      const barColors = ["#2563eb", "#16a34a", "#eab308", "#ea580c", "#7c3aed"];
+      for (let i = 0; i < n; i++) {
+        const barH = (data[i] / maxVal) * chartH;
+        const bx = x1 + padL + gap + i * (barW + gap);
+        const by = y1 + padT + chartH - barH;
+        ctx.fillStyle = barColors[i % barColors.length];
+        ctx.fillRect(bx, by, barW, barH);
+        ctx.strokeStyle = "#1e293b";
+        ctx.strokeRect(bx, by, barW, barH);
+      }
+      ctx.restore();
+    } else if (type === "pieChart") {
+      const data = shape.data || [30, 25, 20, 15, 10];
+      const total = data.reduce((s, v) => s + v, 0) || 1;
+      const rad = Math.min(w, h) / 2 - 10;
+      if (rad <= 0) { ctx.restore(); return; }
+      const sliceColors = ["#2563eb", "#16a34a", "#eab308", "#ea580c", "#7c3aed"];
+      let startA = -Math.PI / 2;
+      ctx.save();
+      for (let i = 0; i < data.length; i++) {
+        const sweep = (data[i] / total) * Math.PI * 2;
+        const endA = startA + sweep;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, rad, startA, endA);
+        ctx.closePath();
+        ctx.fillStyle = sliceColors[i % sliceColors.length];
+        ctx.fill();
+        ctx.strokeStyle = "#1e293b";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        startA = endA;
+      }
+      ctx.restore();
+    } else if (type === "horizontalBarChart") {
+      const data = shape.data || [40, 65, 50, 80, 55];
+      const padL = 25;
+      const padR = 20;
+      const padT = 25;
+      const padB = 40;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+      if (chartW <= 0 || chartH <= 0) { ctx.restore(); return; }
+      const maxVal = Math.max(...data, 1);
+      const n = data.length;
+      const barH = Math.max(6, (chartH / n) * 0.6);
+      const gap = (chartH - n * barH) / (n + 1);
+      ctx.save();
+      ctx.strokeStyle = shape.color || "#374151";
+      ctx.strokeRect(x1 + padL, y1 + padT, chartW, chartH);
+      const barColors = ["#2563eb", "#16a34a", "#eab308", "#ea580c", "#7c3aed"];
+      for (let i = 0; i < n; i++) {
+        const barW = (data[i] / maxVal) * chartW;
+        const bx = x1 + padL;
+        const by = y1 + padT + gap + i * (barH + gap);
+        ctx.fillStyle = barColors[i % barColors.length];
+        ctx.fillRect(bx, by, barW, barH);
+        ctx.strokeStyle = "#1e293b";
+        ctx.strokeRect(bx, by, barW, barH);
+      }
+      ctx.restore();
+    } else if (type === "pictograph") {
+      const data = shape.data || [3, 5, 2, 4, 3];
+      const padL = 30;
+      const padR = 20;
+      const padT = 20;
+      const padB = 25;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+      if (chartW <= 0 || chartH <= 0) { ctx.restore(); return; }
+      const n = data.length;
+      const rowH = chartH / n;
+      const maxCount = Math.max(...data, 1);
+      const symbolColors = ["#2563eb", "#16a34a", "#eab308", "#ea580c", "#7c3aed"];
+      ctx.save();
+      ctx.strokeStyle = shape.color || "#374151";
+      ctx.strokeRect(x1 + padL, y1 + padT, chartW, chartH);
+      for (let i = 0; i < n; i++) {
+        const count = data[i];
+        const cellW = (chartW - 8) / Math.max(maxCount, count);
+        const symSize = Math.min(cellW * 0.75, rowH * 0.5, 14);
+        const sy = y1 + padT + (i + 0.5) * rowH;
+        ctx.fillStyle = symbolColors[i % symbolColors.length];
+        for (let j = 0; j < count; j++) {
+          const sx = x1 + padL + 4 + j * cellW + (cellW - symSize) / 2;
+          ctx.beginPath();
+          ctx.arc(sx + symSize / 2, sy, symSize / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = "#1e293b";
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    } else if (type === "image" && shape.dataUrl) {
+      const img = getCachedImage(shape.dataUrl);
+      if (img && img.complete) {
+        ctx.save();
+        const iw = img.width;
+        const ih = img.height;
+        if (iw > 0 && ih > 0) {
+          ctx.drawImage(img, x1, y1, w, h);
+        }
+        ctx.restore();
+      }
+    }
+
+    if (!isPreview && selectedShapes && selectedShapes.includes(shape)) {
+      const pad = 4;
+      const boxX = Math.min(start.x, end.x) - pad;
+      const boxY = Math.min(start.y, end.y) - pad;
+      const boxW = Math.abs(end.x - start.x) + pad * 2;
+      const boxH = Math.abs(end.y - start.y) + pad * 2;
+
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = shape.locked ? "#6b7280" : "#eab308";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(boxX, boxY, boxW, boxH);
+      ctx.stroke();
+
+      if (shape.locked || shape.type === "group") {
+        shape._resizeHandles = undefined;
+        shape._duplicateHandle = undefined;
+        shape._deleteHandle = undefined;
+        shape._lockHandle = undefined;
+        if (shape.type === "group") {
+          const btnH = 18;
+          const plusPad = 4;
+          const plusSize = 14;
+          const boxX = Math.min(start.x, end.x) - pad;
+          const boxY = Math.min(start.y, end.y) - pad;
+          const boxW = Math.abs(end.x - start.x) + pad * 2;
+          const plusX = boxX + boxW + plusPad;
+          const btnY = boxY - btnH - 4;
+          const delSize = 14;
+          const delPad = 6;
+          const delX = plusX - delSize - delPad;
+          const delY = btnY;
+          const lockSize = 14;
+          const lockPad = 6;
+          const lockX = delX - lockSize - lockPad;
+          const lockY = delY;
+          ctx.setLineDash([]);
+          ctx.fillStyle = "#22c55e";
+          ctx.strokeStyle = "#14532d";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(plusX, btnY, plusSize, plusSize, 4);
+          else ctx.rect(plusX, btnY, plusSize, plusSize);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.strokeStyle = "#022c22";
+          ctx.lineWidth = 2;
+          const cxPlus = plusX + plusSize / 2;
+          const cyPlus = btnY + plusSize / 2;
+          const arm = plusSize * 0.3;
+          ctx.moveTo(cxPlus - arm, cyPlus);
+          ctx.lineTo(cxPlus + arm, cyPlus);
+          ctx.moveTo(cxPlus, cyPlus - arm);
+          ctx.lineTo(cxPlus, cyPlus + arm);
+          ctx.stroke();
+          shape._duplicateHandle = { x: plusX, y: btnY, w: plusSize, h: plusSize };
+          ctx.fillStyle = "#dc2626";
+          ctx.strokeStyle = "#7f1d1d";
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(delX, delY, delSize, delSize, 4);
+          else ctx.rect(delX, delY, delSize, delSize);
+          ctx.fill();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.strokeStyle = "#fef2f2";
+          ctx.lineWidth = 2;
+          const cxDel = delX + delSize / 2;
+          const cyDel = delY + delSize / 2;
+          const armDel = delSize * 0.35;
+          ctx.moveTo(cxDel - armDel, cyDel - armDel);
+          ctx.lineTo(cxDel + armDel, cyDel + armDel);
+          ctx.moveTo(cxDel - armDel, cyDel + armDel);
+          ctx.lineTo(cxDel + armDel, cyDel - armDel);
+          ctx.stroke();
+          shape._deleteHandle = { x: delX, y: delY, w: delSize, h: delSize };
+          ctx.fillStyle = "#4b5563";
+          ctx.strokeStyle = "#374151";
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(lockX, lockY, lockSize, lockSize, 4);
+          else ctx.rect(lockX, lockY, lockSize, lockSize);
+          ctx.fill();
+          ctx.stroke();
+          ctx.strokeStyle = "#e5e7eb";
+          ctx.lineWidth = 1.5;
+          const cxLock = lockX + lockSize / 2;
+          const cyLock = lockY + lockSize / 2;
+          ctx.beginPath();
+          ctx.arc(cxLock, cyLock - 1.5, 3, Math.PI * 0.5, Math.PI * 1.5);
+          ctx.stroke();
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(lockX + 3.5, cyLock + 1, 7, 4.5, 1);
+          else ctx.rect(lockX + 3.5, cyLock + 1, 7, 4.5);
+          ctx.stroke();
+          shape._lockHandle = { x: lockX, y: lockY, w: lockSize, h: lockSize };
+        } else {
+        const btnH = 18;
+        const plusPad = 4;
+        const plusSize = 14;
+        const plusX = boxX + boxW + plusPad;
+        const btnX = plusX - 14 - 6 - 14 - 6 - 44;
+        const btnY = boxY - btnH - 4;
+        const btnW = 50;
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#6b7280";
+        ctx.strokeStyle = "#4b5563";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(btnX, btnY, btnW, btnH, 6);
+        else ctx.rect(btnX, btnY, btnW, btnH);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "10px Arial";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Unlock", btnX + 18, btnY + btnH / 2);
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1.2;
+        const cxLock = btnX + 10;
+        const cyLock = btnY + btnH / 2;
+        ctx.beginPath();
+        ctx.arc(cxLock + 1.5, cyLock - 1.5, 2.5, Math.PI * 0.2, Math.PI * 1.2);
+        ctx.stroke();
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(btnX + 2.5, cyLock + 0.5, 5, 3.5, 1);
+        else ctx.rect(btnX + 2.5, cyLock + 0.5, 5, 3.5);
+        ctx.stroke();
+        shape._unlockHandle = { x: btnX, y: btnY, w: btnW, h: btnH };
+        }
+      } else {
+        const handles = [
+          { corner: "tl", x: boxX, y: boxY },
+          { corner: "tr", x: boxX + boxW, y: boxY },
+          { corner: "br", x: boxX + boxW, y: boxY + boxH },
+          { corner: "bl", x: boxX, y: boxY + boxH },
+        ];
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#eab308";
+        const s = 8;
+        handles.forEach((h) => {
+          ctx.fillRect(h.x - s / 2, h.y - s / 2, s, s);
+        });
+        shape._resizeHandles = handles;
+
+        const plusSize = 14;
+        const plusPad = 4;
+        const plusX = boxX + boxW + plusPad;
+        const plusY = boxY - plusSize - plusPad;
+        ctx.fillStyle = "#22c55e";
+        ctx.strokeStyle = "#14532d";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(plusX, plusY, plusSize, plusSize, 4);
+        else ctx.rect(plusX, plusY, plusSize, plusSize);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#022c22";
+        ctx.lineWidth = 2;
+        const cxPlus = plusX + plusSize / 2;
+        const cyPlus = plusY + plusSize / 2;
+        const arm = plusSize * 0.3;
+        ctx.moveTo(cxPlus - arm, cyPlus);
+        ctx.lineTo(cxPlus + arm, cyPlus);
+        ctx.moveTo(cxPlus, cyPlus - arm);
+        ctx.lineTo(cxPlus, cyPlus + arm);
+        ctx.stroke();
+        shape._duplicateHandle = { x: plusX, y: plusY, w: plusSize, h: plusSize };
+
+        const delSize = 14;
+        const delPad = 6;
+        const delX = plusX - delSize - delPad;
+        const delY = plusY;
+        ctx.fillStyle = "#dc2626";
+        ctx.strokeStyle = "#7f1d1d";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(delX, delY, delSize, delSize, 4);
+        else ctx.rect(delX, delY, delSize, delSize);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = "#fef2f2";
+        ctx.lineWidth = 2;
+        const cxDel = delX + delSize / 2;
+        const cyDel = delY + delSize / 2;
+        const armDel = delSize * 0.35;
+        ctx.moveTo(cxDel - armDel, cyDel - armDel);
+        ctx.lineTo(cxDel + armDel, cyDel + armDel);
+        ctx.moveTo(cxDel - armDel, cyDel + armDel);
+        ctx.lineTo(cxDel + armDel, cyDel - armDel);
+        ctx.stroke();
+        shape._deleteHandle = { x: delX, y: delY, w: delSize, h: delSize };
+
+        const lockSize = 14;
+        const lockPad = 6;
+        const lockX = delX - lockSize - lockPad;
+        const lockY = delY;
+        ctx.fillStyle = "#4b5563";
+        ctx.strokeStyle = "#374151";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(lockX, lockY, lockSize, lockSize, 4);
+        else ctx.rect(lockX, lockY, lockSize, lockSize);
+        ctx.fill();
+        ctx.stroke();
+        ctx.strokeStyle = "#e5e7eb";
+        ctx.lineWidth = 1.5;
+        const cxLock = lockX + lockSize / 2;
+        const cyLock = lockY + lockSize / 2;
+        ctx.beginPath();
+        ctx.arc(cxLock, cyLock - 1.5, 3, Math.PI * 0.5, Math.PI * 1.5);
+        ctx.stroke();
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(lockX + 3.5, cyLock + 1, 7, 4.5, 1);
+        else ctx.rect(lockX + 3.5, cyLock + 1, 7, 4.5);
+        ctx.stroke();
+        shape._lockHandle = { x: lockX, y: lockY, w: lockSize, h: lockSize };
+      }
+    }
+
+    ctx.restore();
+  }
+
+  function updateBoardInfoLabel() {
+    if (!boardInfoLabel) return;
+    const typeLabel =
+      currentBoardType === "white"
+        ? "Whiteboard"
+        : currentBoardType === "black"
+        ? "Blackboard"
+        : "Green board";
+    boardInfoLabel.textContent = `${typeLabel} - Page ${
+      currentPageIndex + 1
+    }`;
+  }
+
+  function updateZoomLabel() {
+    if (!zoomLabel) return;
+    zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
+  }
+
+  function setBoardType(type) {
+    currentBoardType = type;
+    Array.from(
+      boardTypeToggle.querySelectorAll(".board-type-button")
+    ).forEach((btn) => {
+      const isActive = btn.getAttribute("data-board") === type;
+      btn.classList.toggle("board-type-button--active", isActive);
+    });
+    // Adjust default drawing colors based on board background
+    if (type === "black" || type === "green") {
+      penSettings.color = "#ffffff";
+      textSettings.color = "#ffffff";
+      shapeSettings.color = "#ffffff";
+    } else {
+      penSettings.color = "#0f172a";
+      textSettings.color = "#0f172a";
+      shapeSettings.color = "#0f172a";
+    }
+    updateBoardAppearance();
+    updateBoardInfoLabel();
+  }
+
+  function setZoom(newZoom) {
+    zoom = Math.min(2, Math.max(0.5, newZoom));
+    updateZoomLabel();
+    updateBoardAppearance();
+  }
+
+  function updateLayoutForPanels() {
+    if (!mainLayout) return;
+    const leftHidden = !leftPanel || leftPanel.classList.contains("is-hidden");
+    const rightHidden = !rightPanel || rightPanel.classList.contains("is-hidden");
+    mainLayout.classList.toggle("no-left", leftHidden);
+    mainLayout.classList.toggle("no-right", rightHidden);
+  }
+
+  function handleToolSelection(tool) {
+    currentTool = tool;
+    toolButtons.forEach((btn) => {
+      const isActive = btn.getAttribute("data-tool") === tool;
+      btn.classList.toggle("tool-button--active", isActive);
+    });
+
+    if (!propertiesContent) return;
+    propertiesContent.innerHTML = "";
+
+    const heading = document.createElement("h3");
+    if (tool === "stamps") {
+      heading.textContent = "Saved images";
+    } else if (tool === "math") {
+      heading.textContent = "Symbols";
+    } else if (tool === "notes") {
+      heading.textContent = "Sticky notes";
+    } else {
+      heading.textContent = tool[0].toUpperCase() + tool.slice(1) + " tool";
+    }
+    heading.style.fontSize = "0.85rem";
+    heading.style.margin = "0 0 0.4rem";
+
+    propertiesContent.appendChild(heading);
+
+    if (tool === "pen" || tool === "highlighter") {
+      renderPenOptions(tool);
+    } else if (tool === "eraser") {
+      renderEraserOptions();
+    } else if (tool === "shapes") {
+      renderShapeOptions();
+    } else if (tool === "text") {
+      renderTextOptions();
+    } else if (tool === "notes") {
+      renderStickyOptions();
+    } else if (tool === "math") {
+      renderMathSymbolsOptions();
+    } else if (tool === "select") {
+      renderSelectOptions();
+    } else if (tool === "charts") {
+      renderChartOptions();
+    } else if (tool === "stamps") {
+      renderStampOptions();
+    } else if (tool === "graphs") {
+      const wrap = document.createElement("div");
+      wrap.className = "tool-options-group";
+      const p = document.createElement("p");
+      p.style.fontSize = "0.8rem";
+      p.style.color = "#9ca3af";
+      p.style.margin = "0";
+      p.textContent = "Graphs tool shows a full-page graph with horizontal and vertical axes and four quadrants while this tool is active. Use Pen/Highlighter to draw on it.";
+      wrap.appendChild(p);
+      propertiesContent.appendChild(wrap);
+    } else {
+      const text = document.createElement("p");
+      text.style.fontSize = "0.8rem";
+      text.style.color = "#9ca3af";
+      text.style.margin = "0";
+      text.textContent =
+        "Tool options will appear here as we add more controls.";
+      propertiesContent.appendChild(text);
+    }
+
+    // Redraw when switching tools so Graphs background (and others) appear immediately
+    updateBoardAppearance();
+  }
+
+  function applyFormatToSelectedTexts(prop, value) {
+    selectedTexts.forEach((t) => { t[prop] = value; });
+    updateBoardAppearance();
+  }
+
+  function moveSelectedToBack() {
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    if (!page.shapes) page.shapes = [];
+    if (!page.texts) page.texts = [];
+    const hasAny = (selectedShapes && selectedShapes.length) || (selectedTexts && selectedTexts.length);
+    if (!hasAny) return;
+    pushUndo();
+    if (selectedShapes.length) {
+      const set = new Set(selectedShapes);
+      const selected = [];
+      const rest = [];
+      for (const s of page.shapes) {
+        if (set.has(s)) selected.push(s);
+        else rest.push(s);
+      }
+      page.shapes = selected.concat(rest);
+    }
+    if (selectedTexts.length) {
+      const setT = new Set(selectedTexts);
+      const selectedT = [];
+      const restT = [];
+      for (const t of page.texts) {
+        if (setT.has(t)) selectedT.push(t);
+        else restT.push(t);
+      }
+      page.texts = selectedT.concat(restT);
+    }
+    updateBoardAppearance();
+  }
+
+  function copyStyle() {
+    if (selectedShapes.length > 0) {
+      const s = selectedShapes[0];
+      styleClipboard.shapeStyle = {
+        color: s.color != null ? s.color : "#0f172a",
+        width: s.width != null ? s.width : 2,
+        fillMode: s.fillMode != null ? s.fillMode : "hollow",
+      };
+    }
+    if (selectedTexts.length > 0) {
+      const t = selectedTexts[0];
+      styleClipboard.textStyle = {
+        color: t.color != null ? t.color : "#0f172a",
+        fontSize: t.fontSize != null ? t.fontSize : 32,
+        fontFamily: t.fontFamily != null ? t.fontFamily : "Arial",
+        bold: !!t.bold,
+        italic: !!t.italic,
+        underline: !!t.underline,
+        stickyColor: t.sticky ? (t.stickyColor != null ? t.stickyColor : "#fef08a") : undefined,
+      };
+    }
+    if (selectedShapes.length === 0 && selectedTexts.length === 0) {
+      styleClipboard.shapeStyle = null;
+      styleClipboard.textStyle = null;
+    }
+  }
+
+  function pasteStyle() {
+    const hasShapeClip = styleClipboard.shapeStyle != null;
+    const hasTextClip = styleClipboard.textStyle != null;
+    if (!hasShapeClip && !hasTextClip) return;
+    pushUndo();
+    if (hasShapeClip && selectedShapes.length > 0) {
+      const clip = styleClipboard.shapeStyle;
+      selectedShapes.forEach((s) => {
+        s.color = clip.color;
+        s.width = clip.width;
+        s.fillMode = clip.fillMode;
+      });
+    }
+    if (hasTextClip && selectedTexts.length > 0) {
+      const clip = styleClipboard.textStyle;
+      selectedTexts.forEach((t) => {
+        t.color = clip.color;
+        t.fontSize = clip.fontSize;
+        t.fontFamily = clip.fontFamily;
+        t.bold = clip.bold;
+        t.italic = clip.italic;
+        t.underline = clip.underline;
+        if (t.sticky && clip.stickyColor != null) t.stickyColor = clip.stickyColor;
+      });
+    }
+    if (hasShapeClip && selectedTexts.length > 0 && selectedShapes.length === 0) {
+      selectedTexts.forEach((t) => { t.color = styleClipboard.shapeStyle.color; });
+    }
+    if (hasTextClip && selectedShapes.length > 0 && selectedTexts.length === 0) {
+      selectedShapes.forEach((s) => { s.color = styleClipboard.textStyle.color; });
+    }
+    updateBoardAppearance();
+    if (currentTool === "select") handleToolSelection("select");
+  }
+
+  function renderSelectOptions() {
+    const wrap = document.createElement("div");
+    wrap.className = "tool-options-group";
+    const p = document.createElement("p");
+    p.style.fontSize = "0.8rem";
+    p.style.color = "#9ca3af";
+    p.style.margin = "0 0 0.5rem 0";
+    const totalSelected = selectedShapes.length + selectedTexts.length;
+    if (totalSelected > 0) {
+      p.textContent = `${totalSelected} item(s) selected. Shift+click to add/remove. Drag on empty area to select by box.`;
+      const actionsRow = document.createElement("div");
+      actionsRow.className = "color-swatch-row";
+      actionsRow.style.marginTop = "0.25rem";
+      actionsRow.style.display = "flex";
+      actionsRow.style.flexWrap = "wrap";
+      actionsRow.style.gap = "0.35rem";
+      actionsRow.style.alignItems = "center";
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.textContent = "Delete selected";
+      delBtn.style.padding = "0.35rem 0.75rem";
+      delBtn.style.minHeight = "32px";
+      delBtn.style.borderRadius = "999px";
+      delBtn.style.border = "none";
+      delBtn.style.background = "#dc2626";
+      delBtn.style.color = "#fff";
+      delBtn.style.cursor = "pointer";
+      delBtn.style.fontSize = "0.8rem";
+      delBtn.style.display = "inline-flex";
+      delBtn.style.alignItems = "center";
+      delBtn.style.justifyContent = "center";
+      delBtn.addEventListener("click", deleteSelected);
+
+      const backBtn = document.createElement("button");
+      backBtn.type = "button";
+      backBtn.textContent = "Move selected to back";
+      backBtn.style.padding = "0.35rem 0.75rem";
+      backBtn.style.minHeight = "32px";
+      backBtn.style.borderRadius = "999px";
+      backBtn.style.border = "none";
+      backBtn.style.background = "#1e3a5f";
+      backBtn.style.color = "#e5e7eb";
+      backBtn.style.cursor = "pointer";
+      backBtn.style.fontSize = "0.8rem";
+      backBtn.style.display = "inline-flex";
+      backBtn.style.alignItems = "center";
+      backBtn.style.justifyContent = "center";
+      backBtn.addEventListener("click", moveSelectedToBack);
+
+      const dupBtn = document.createElement("button");
+      dupBtn.type = "button";
+      dupBtn.textContent = "Duplicate";
+      dupBtn.style.padding = "0.35rem 0.75rem";
+      dupBtn.style.minHeight = "32px";
+      dupBtn.style.borderRadius = "999px";
+      dupBtn.style.border = "none";
+      dupBtn.style.background = "#22c55e";
+      dupBtn.style.color = "#020617";
+      dupBtn.style.cursor = "pointer";
+      dupBtn.style.fontSize = "0.8rem";
+      dupBtn.style.display = "inline-flex";
+      dupBtn.style.alignItems = "center";
+      dupBtn.style.justifyContent = "center";
+      dupBtn.addEventListener("click", duplicateSelected);
+
+      const groupBtn = document.createElement("button");
+      groupBtn.type = "button";
+      groupBtn.textContent = "Group";
+      groupBtn.title = "Group selected objects (2 or more)";
+      groupBtn.style.padding = "0.35rem 0.75rem";
+      groupBtn.style.minHeight = "32px";
+      groupBtn.style.borderRadius = "999px";
+      groupBtn.style.border = "none";
+      groupBtn.style.background = "#0ea5e9";
+      groupBtn.style.color = "#fff";
+      groupBtn.style.cursor = "pointer";
+      groupBtn.style.fontSize = "0.8rem";
+      groupBtn.style.display = "inline-flex";
+      groupBtn.style.alignItems = "center";
+      groupBtn.style.justifyContent = "center";
+      groupBtn.addEventListener("click", () => { groupSelected(); if (currentTool === "select") handleToolSelection("select"); });
+      if (totalSelected >= 2) actionsRow.appendChild(groupBtn);
+
+      const ungroupBtn = document.createElement("button");
+      ungroupBtn.type = "button";
+      ungroupBtn.textContent = "Ungroup";
+      ungroupBtn.title = "Ungroup selected group";
+      ungroupBtn.style.padding = "0.35rem 0.75rem";
+      ungroupBtn.style.minHeight = "32px";
+      ungroupBtn.style.borderRadius = "999px";
+      ungroupBtn.style.border = "none";
+      ungroupBtn.style.background = "#8b5cf6";
+      ungroupBtn.style.color = "#fff";
+      ungroupBtn.style.cursor = "pointer";
+      ungroupBtn.style.fontSize = "0.8rem";
+      ungroupBtn.style.display = "inline-flex";
+      ungroupBtn.style.alignItems = "center";
+      ungroupBtn.style.justifyContent = "center";
+      ungroupBtn.addEventListener("click", () => { ungroupSelected(); if (currentTool === "select") handleToolSelection("select"); });
+      const singleGroupSelected = totalSelected === 1 && selectedShapes.length === 1 && selectedShapes[0].type === "group";
+      if (singleGroupSelected) actionsRow.appendChild(ungroupBtn);
+
+      const lockBtn = document.createElement("button");
+      lockBtn.type = "button";
+      lockBtn.textContent = "Lock";
+      lockBtn.style.padding = "0.35rem 0.75rem";
+      lockBtn.style.minHeight = "32px";
+      lockBtn.style.borderRadius = "999px";
+      lockBtn.style.border = "none";
+      lockBtn.style.background = "#4b5563";
+      lockBtn.style.color = "#fff";
+      lockBtn.style.cursor = "pointer";
+      lockBtn.style.fontSize = "0.8rem";
+      lockBtn.style.display = "inline-flex";
+      lockBtn.style.alignItems = "center";
+      lockBtn.style.justifyContent = "center";
+      lockBtn.addEventListener("click", lockSelected);
+      const anyUnlocked = selectedShapes.some((s) => !s.locked) || selectedTexts.some((t) => !t.locked);
+      if (totalSelected >= 1 && anyUnlocked) actionsRow.appendChild(lockBtn);
+
+      const unlockBtn = document.createElement("button");
+      unlockBtn.type = "button";
+      unlockBtn.textContent = "Unlock";
+      unlockBtn.style.padding = "0.35rem 0.75rem";
+      unlockBtn.style.minHeight = "32px";
+      unlockBtn.style.borderRadius = "999px";
+      unlockBtn.style.border = "none";
+      unlockBtn.style.background = "#6b7280";
+      unlockBtn.style.color = "#fff";
+      unlockBtn.style.cursor = "pointer";
+      unlockBtn.style.fontSize = "0.8rem";
+      unlockBtn.style.display = "inline-flex";
+      unlockBtn.style.alignItems = "center";
+      unlockBtn.style.justifyContent = "center";
+      unlockBtn.addEventListener("click", unlockSelected);
+      const anyLocked = selectedShapes.some((s) => s.locked) || selectedTexts.some((t) => t.locked);
+      if (totalSelected >= 1 && anyLocked) actionsRow.appendChild(unlockBtn);
+
+      const copyStyleBtn = document.createElement("button");
+      copyStyleBtn.type = "button";
+      copyStyleBtn.textContent = "Copy style";
+      copyStyleBtn.title = "Copy colour, font, etc. from first selected item";
+      copyStyleBtn.style.padding = "0.35rem 0.75rem";
+      copyStyleBtn.style.minHeight = "32px";
+      copyStyleBtn.style.borderRadius = "999px";
+      copyStyleBtn.style.border = "none";
+      copyStyleBtn.style.background = "#0ea5e9";
+      copyStyleBtn.style.color = "#020617";
+      copyStyleBtn.style.cursor = "pointer";
+      copyStyleBtn.style.fontSize = "0.8rem";
+      copyStyleBtn.style.display = "inline-flex";
+      copyStyleBtn.style.alignItems = "center";
+      copyStyleBtn.style.justifyContent = "center";
+      copyStyleBtn.addEventListener("click", () => { copyStyle(); if (currentTool === "select") handleToolSelection("select"); });
+
+      const pasteStyleBtn = document.createElement("button");
+      pasteStyleBtn.type = "button";
+      pasteStyleBtn.textContent = "Paste style";
+      pasteStyleBtn.title = "Apply copied style to selected item(s)";
+      pasteStyleBtn.style.padding = "0.35rem 0.75rem";
+      pasteStyleBtn.style.minHeight = "32px";
+      pasteStyleBtn.style.borderRadius = "999px";
+      pasteStyleBtn.style.border = "none";
+      pasteStyleBtn.style.background = "#8b5cf6";
+      pasteStyleBtn.style.color = "#fff";
+      pasteStyleBtn.style.cursor = "pointer";
+      pasteStyleBtn.style.fontSize = "0.8rem";
+      pasteStyleBtn.style.display = "inline-flex";
+      pasteStyleBtn.style.alignItems = "center";
+      pasteStyleBtn.style.justifyContent = "center";
+      pasteStyleBtn.disabled = !styleClipboard.shapeStyle && !styleClipboard.textStyle;
+      pasteStyleBtn.style.opacity = (styleClipboard.shapeStyle || styleClipboard.textStyle) ? "1" : "0.6";
+      pasteStyleBtn.addEventListener("click", () => { pasteStyle(); });
+
+      actionsRow.appendChild(delBtn);
+      actionsRow.appendChild(backBtn);
+      actionsRow.appendChild(dupBtn);
+      actionsRow.appendChild(copyStyleBtn);
+      actionsRow.appendChild(pasteStyleBtn);
+
+      wrap.appendChild(p);
+      wrap.appendChild(actionsRow);
+
+      if (selectedTexts.length > 0) {
+        const first = selectedTexts[0];
+        const fmtTitle = document.createElement("h3");
+        fmtTitle.style.fontSize = "0.85rem";
+        fmtTitle.style.margin = "0.75rem 0 0.35rem 0";
+        fmtTitle.style.color = "#e5e7eb";
+        fmtTitle.textContent = "Format text";
+        wrap.appendChild(fmtTitle);
+
+        const fontLabel = document.createElement("span");
+        fontLabel.className = "tool-options-label";
+        fontLabel.textContent = "Font";
+        wrap.appendChild(fontLabel);
+        const fontSelect = document.createElement("select");
+        fontSelect.style.width = "100%";
+        fontSelect.style.padding = "0.3rem";
+        fontSelect.style.fontSize = "0.8rem";
+        fontSelect.style.background = "#020617";
+        fontSelect.style.color = "#e5e7eb";
+        fontSelect.style.border = "1px solid #111827";
+        fontSelect.style.borderRadius = "6px";
+        FONT_OPTIONS.forEach((f) => {
+          const opt = document.createElement("option");
+          opt.value = f;
+          opt.textContent = f;
+          if ((first.fontFamily || "Arial") === f) opt.selected = true;
+          fontSelect.appendChild(opt);
+        });
+        fontSelect.addEventListener("change", () => applyFormatToSelectedTexts("fontFamily", fontSelect.value));
+        wrap.appendChild(fontSelect);
+
+        const editRow = document.createElement("div");
+        editRow.className = "color-swatch-row";
+        editRow.style.marginTop = "0.35rem";
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.textContent = "Edit text content";
+        editBtn.style.padding = "0.35rem 0.75rem";
+        editBtn.style.borderRadius = "999px";
+        editBtn.style.border = "none";
+        editBtn.style.background = "#38bdf8";
+        editBtn.style.color = "#020617";
+        editBtn.style.cursor = "pointer";
+        editBtn.style.fontSize = "0.8rem";
+        editBtn.addEventListener("click", () => {
+          if (selectedTexts.length > 0) openEditTextInput(selectedTexts[0]);
+        });
+        editRow.appendChild(editBtn);
+        wrap.appendChild(editRow);
+
+        const styleRow = document.createElement("div");
+        styleRow.className = "color-swatch-row";
+        styleRow.style.marginTop = "0.35rem";
+        [
+          { key: "bold", label: "B", title: "Bold", style: (v) => ({ fontWeight: v ? "700" : "400" }) },
+          { key: "italic", label: "I", title: "Italic", style: (v) => ({ fontStyle: v ? "italic" : "normal" }) },
+          { key: "underline", label: "U", title: "Underline", style: (v) => ({ textDecoration: v ? "underline" : "none" }) },
+        ].forEach(({ key, label, title, style }) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = label;
+          btn.title = title;
+          Object.assign(btn.style, { width: "32px", height: "28px", padding: "0", borderRadius: "6px", border: "none", cursor: "pointer", fontSize: "0.9rem" }, style(!!first[key]));
+          const val = !!first[key];
+          btn.style.backgroundColor = val ? "#22c55e" : "#020617";
+          btn.style.color = val ? "#020617" : "#e5e7eb";
+          btn.addEventListener("click", () => {
+            const newVal = !selectedTexts[0][key];
+            applyFormatToSelectedTexts(key, newVal);
+            Object.assign(btn.style, style(newVal));
+            btn.style.backgroundColor = newVal ? "#22c55e" : "#020617";
+            btn.style.color = newVal ? "#020617" : "#e5e7eb";
+          });
+          styleRow.appendChild(btn);
+        });
+        wrap.appendChild(styleRow);
+
+        const colorLabel = document.createElement("span");
+        colorLabel.className = "tool-options-label";
+        colorLabel.textContent = "Color";
+        colorLabel.style.marginTop = "0.35rem";
+        wrap.appendChild(colorLabel);
+        const colorRow = document.createElement("div");
+        colorRow.className = "color-swatch-row";
+        const textColors = ["#0f172a", "#2563eb", "#dc2626", "#16a34a", "#ea580c", "#eab308", "#ffffff"];
+        textColors.forEach((color) => {
+          const swatch = document.createElement("button");
+          swatch.type = "button";
+          swatch.className = "color-swatch";
+          swatch.style.backgroundColor = color;
+          if ((first.color || "#0f172a") === color) swatch.classList.add("color-swatch--active");
+          swatch.addEventListener("click", () => {
+            applyFormatToSelectedTexts("color", color);
+            colorRow.querySelectorAll(".color-swatch").forEach((el) => el.classList.remove("color-swatch--active"));
+            swatch.classList.add("color-swatch--active");
+          });
+          colorRow.appendChild(swatch);
+        });
+        wrap.appendChild(colorRow);
+
+        const hasStickySelected = selectedTexts.some((t) => t.sticky);
+        if (hasStickySelected) {
+          const stickyColorLabel = document.createElement("span");
+          stickyColorLabel.className = "tool-options-label";
+          stickyColorLabel.textContent = "Sticky note color";
+          stickyColorLabel.style.marginTop = "0.5rem";
+          stickyColorLabel.style.display = "block";
+          wrap.appendChild(stickyColorLabel);
+          const stickyColorRow = document.createElement("div");
+          stickyColorRow.className = "color-swatch-row";
+          stickyColorRow.style.marginTop = "0.25rem";
+          stickyColorRow.style.flexWrap = "wrap";
+          stickyColorRow.style.gap = "0.35rem";
+          const stickyColors = [
+            "#fef08a", "#fde047", "#facc15", "#fcd34d",
+            "#fbcfe8", "#f9a8d4", "#f472b6",
+            "#bbf7d0", "#86efac", "#4ade80",
+            "#bfdbfe", "#93c5fd", "#60a5fa",
+            "#fed7aa", "#fdba74", "#fb923c",
+            "#e9d5ff", "#d8b4fe", "#c084fc",
+          ];
+          const firstSticky = selectedTexts.find((t) => t.sticky);
+          const firstStickyColor = (firstSticky && (firstSticky.stickyColor || stickyNotesSettings.color)) || stickyNotesSettings.color || "#fef08a";
+          stickyColors.forEach((color) => {
+            const swatch = document.createElement("button");
+            swatch.type = "button";
+            swatch.className = "color-swatch";
+            swatch.style.backgroundColor = color;
+            swatch.style.width = "28px";
+            swatch.style.height = "28px";
+            swatch.style.borderRadius = "6px";
+            swatch.style.cursor = "pointer";
+            swatch.title = color;
+            if (firstStickyColor === color) swatch.style.border = "2px solid #e5e7eb";
+            else swatch.style.border = "1px solid #374151";
+            swatch.addEventListener("click", () => {
+              selectedTexts.forEach((t) => {
+                if (t.sticky) t.stickyColor = color;
+              });
+              stickyColorRow.querySelectorAll("button").forEach((b) => {
+                b.style.border = (b === swatch) ? "2px solid #e5e7eb" : "1px solid #374151";
+              });
+              updateBoardAppearance();
+            });
+            stickyColorRow.appendChild(swatch);
+          });
+          wrap.appendChild(stickyColorRow);
+        }
+
+        const sizeLabel = document.createElement("label");
+        sizeLabel.className = "tool-options-label";
+        sizeLabel.textContent = "Font size";
+        const sizeSlider = document.createElement("input");
+        sizeSlider.type = "range";
+        sizeSlider.min = "14";
+        sizeSlider.max = "96";
+        sizeSlider.value = String(first.fontSize ?? 32);
+        sizeSlider.className = "slider-input";
+        sizeSlider.addEventListener("input", () => applyFormatToSelectedTexts("fontSize", Number(sizeSlider.value)));
+        wrap.appendChild(sizeLabel);
+        wrap.appendChild(sizeSlider);
+      }
+    } else {
+      p.textContent = "Click a shape to select. Shift+click to add or remove from selection. Drag on empty area to select multiple with a box.";
+      wrap.appendChild(p);
+    }
+    propertiesContent.appendChild(wrap);
+  }
+
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function el(svg, tag, attrs) {
+    var n = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) n.setAttribute(k, attrs[k]);
+    svg.appendChild(n);
+    return n;
+  }
+  function createToolbarIconSvg(tool) {
+    var svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "24");
+    svg.setAttribute("height", "24");
+    svg.setAttribute("aria-hidden", "true");
+    if (tool === "select") {
+      el(svg, "path", { d: "M3 3l7.07 16.97 2.51-6.5 6.5-2.51L3 3z", fill: "currentColor" });
+    } else if (tool === "pen") {
+      el(svg, "path", { d: "M12 19l7-7-3-3-7 7 3 3z", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "path", { d: "M18 13l-1.5-7L3 3", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+    } else if (tool === "highlighter") {
+      el(svg, "path", { d: "M9 12l3 3 7-7", fill: "none", stroke: "currentColor", "stroke-width": "2.5" });
+      el(svg, "path", { d: "M12 15L8 11l4-7 2 2-3 6 5 5z", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+    } else if (tool === "eraser") {
+      el(svg, "path", { d: "M20 20H8L3 15l9-9 5 5 3 3-5 6z", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "path", { d: "M12 11l5 5", fill: "none", stroke: "currentColor", "stroke-width": "1.5" });
+    } else if (tool === "shapes") {
+      el(svg, "rect", { x: "5", y: "6", width: "14", height: "12", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "circle", { cx: "12", cy: "12", r: "3", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (tool === "text") {
+      var t = document.createElementNS(SVGNS, "text");
+      t.setAttribute("x", "12");
+      t.setAttribute("y", "18");
+      t.setAttribute("text-anchor", "middle");
+      t.setAttribute("font-size", "20");
+      t.setAttribute("font-weight", "bold");
+      t.setAttribute("font-family", "system-ui,sans-serif");
+      t.setAttribute("fill", "currentColor");
+      t.textContent = "T";
+      svg.appendChild(t);
+    } else if (tool === "charts") {
+      el(svg, "rect", { x: "5", y: "14", width: "4", height: "6", fill: "currentColor" });
+      el(svg, "rect", { x: "11", y: "10", width: "4", height: "10", fill: "currentColor" });
+      el(svg, "rect", { x: "17", y: "6", width: "4", height: "14", fill: "currentColor" });
+    } else if (tool === "hand") {
+      el(svg, "path", { d: "M18 11V6a2 2 0 00-4 0v5", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "path", { d: "M14 10V4a2 2 0 00-4 0v6", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "path", { d: "M10 10.5V6a2 2 0 00-4 0v8", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "path", { d: "M18 8a2 2 0 114 0v6a4 4 0 01-4 4h-2", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+      el(svg, "path", { d: "M6 12h8", fill: "none", stroke: "currentColor", "stroke-width": "2" });
+    } else {
+      return svg;
+    }
+    return svg;
+  }
+  function createChartIconSvg(id) {
+    var svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "28");
+    svg.setAttribute("height", "28");
+    svg.setAttribute("aria-hidden", "true");
+    if (id === "barChart") {
+      el(svg, "rect", { x: "4", y: "14", width: "4", height: "6", fill: "currentColor" });
+      el(svg, "rect", { x: "10", y: "10", width: "4", height: "10", fill: "currentColor" });
+      el(svg, "rect", { x: "16", y: "6", width: "4", height: "14", fill: "currentColor" });
+    } else if (id === "horizontalBarChart") {
+      el(svg, "rect", { x: "4", y: "5", width: "6", height: "4", fill: "currentColor" });
+      el(svg, "rect", { x: "4", y: "10", width: "10", height: "4", fill: "currentColor" });
+      el(svg, "rect", { x: "4", y: "15", width: "14", height: "4", fill: "currentColor" });
+    } else if (id === "pictograph") {
+      el(svg, "circle", { cx: "5", cy: "5", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "12", cy: "5", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "19", cy: "5", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "5", cy: "12", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "12", cy: "12", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "19", cy: "12", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "5", cy: "19", r: "2", fill: "currentColor" });
+      el(svg, "circle", { cx: "12", cy: "19", r: "2", fill: "currentColor" });
+    } else if (id === "pieChart") {
+      el(svg, "circle", { cx: "12", cy: "12", r: "9", fill: "none", stroke: "currentColor", "stroke-width": "1" });
+      el(svg, "path", { d: "M12 12 L12 3 A9 9 0 0 1 19.5 9.4 Z", fill: "currentColor" });
+      el(svg, "path", { d: "M12 12 L19.5 9.4 A9 9 0 0 1 19.5 14.6 Z", fill: "currentColor" });
+      el(svg, "path", { d: "M12 12 L19.5 14.6 A9 9 0 0 1 4.5 14.6 Z", fill: "currentColor" });
+      el(svg, "path", { d: "M12 12 L4.5 14.6 A9 9 0 0 1 4.5 9.4 Z", fill: "currentColor" });
+    } else {
+      el(svg, "rect", { x: "4", y: "14", width: "4", height: "6", fill: "currentColor" });
+      el(svg, "rect", { x: "10", y: "10", width: "4", height: "10", fill: "currentColor" });
+      el(svg, "rect", { x: "16", y: "6", width: "4", height: "14", fill: "currentColor" });
+    }
+    return svg;
+  }
+  function createShapeIconSvg(id) {
+    var svg = document.createElementNS(SVGNS, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "26");
+    svg.setAttribute("height", "26");
+    svg.setAttribute("aria-hidden", "true");
+    var strokeStyle = { fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round" };
+    if (id === "line") {
+      el(svg, "line", { x1: "4", y1: "12", x2: "20", y2: "12", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "ray") {
+      el(svg, "line", { x1: "4", y1: "12", x2: "18", y2: "12", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+      el(svg, "line", { x1: "16", y1: "9", x2: "20", y2: "12", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+      el(svg, "line", { x1: "16", y1: "15", x2: "20", y2: "12", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "rectangle") {
+      el(svg, "rect", { x: "5", y: "6", width: "14", height: "12", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "circle") {
+      el(svg, "circle", { cx: "12", cy: "12", r: "8", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "triangle") {
+      el(svg, "polygon", { points: "12,5 20,19 4,19", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linejoin": "round" });
+    } else if (id === "rhombus") {
+      el(svg, "polygon", { points: "12,4 20,12 12,20 4,12", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "pentagon") {
+      el(svg, "polygon", { points: "12,3 21,9 17,20 7,20 3,9", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "hexagon") {
+      el(svg, "polygon", { points: "12,2 20,7 20,17 12,22 4,17 4,7", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "parallelogram") {
+      el(svg, "polygon", { points: "6,4 22,4 18,20 2,20", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "trapezium") {
+      el(svg, "polygon", { points: "7,6 17,6 21,18 3,18", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else if (id === "star") {
+      el(svg, "polygon", { points: "12,2 14,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 10,9", fill: "none", stroke: "currentColor", "stroke-width": "1.8" });
+    } else {
+      var text = document.createElementNS(SVGNS, "text");
+      var labels = { cube: "Cu", cuboid: "Cb", cylinder: "Cy", cone: "Co", sphere: "S", pie3d: "P" };
+      text.textContent = labels[id] || "?";
+      text.setAttribute("x", "12");
+      text.setAttribute("y", "15.5");
+      text.setAttribute("text-anchor", "middle");
+      text.setAttribute("fill", "currentColor");
+      text.setAttribute("font-size", "14");
+      text.setAttribute("font-weight", "600");
+      text.setAttribute("font-family", "system-ui,sans-serif");
+      svg.appendChild(text);
+    }
+    return svg;
+  }
+
+  function renderChartOptions() {
+    const group = document.createElement("div");
+    group.className = "tool-options-group";
+    const label = document.createElement("span");
+    label.className = "tool-options-label";
+    label.textContent = "Chart type";
+    group.appendChild(label);
+    const row = document.createElement("div");
+    row.className = "color-swatch-row";
+    row.style.marginTop = "0.25rem";
+    [
+      { id: "barChart", title: "Bar chart (vertical)" },
+      { id: "horizontalBarChart", title: "Horizontal bar chart" },
+      { id: "pictograph", title: "Pictograph" },
+      { id: "pieChart", title: "Pie chart" },
+    ].forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option-icon-btn";
+      btn.appendChild(createChartIconSvg(opt.id));
+      btn.title = opt.title;
+      btn.style.width = "44px";
+      btn.style.minWidth = "44px";
+      btn.style.height = "44px";
+      btn.style.minHeight = "44px";
+      btn.style.padding = "0";
+      btn.style.borderRadius = "8px";
+      btn.style.border = "none";
+      btn.style.cursor = "pointer";
+      btn.style.display = "flex";
+      btn.style.alignItems = "center";
+      btn.style.justifyContent = "center";
+      btn.style.flexShrink = "0";
+      btn.style.backgroundColor = chartSettings.type === opt.id ? "#22c55e" : "#020617";
+      btn.style.color = chartSettings.type === opt.id ? "#020617" : "#e5e7eb";
+      btn.addEventListener("click", () => {
+        chartSettings.type = opt.id;
+        row.querySelectorAll("button").forEach((b) => {
+          b.style.backgroundColor = "#020617";
+          b.style.color = "#e5e7eb";
+        });
+        btn.style.backgroundColor = "#22c55e";
+        btn.style.color = "#020617";
+      });
+      row.appendChild(btn);
+    });
+    group.appendChild(row);
+    const hint = document.createElement("p");
+    hint.style.fontSize = "0.75rem";
+    hint.style.color = "#9ca3af";
+    hint.style.margin = "0.5rem 0 0 0";
+    hint.textContent = "Drag on the board to place the chart. Select and resize with Pointer tool.";
+    group.appendChild(hint);
+    propertiesContent.appendChild(group);
+  }
+
+  function renderPenOptions(tool) {
+    const isHighlighter = tool === "highlighter";
+    const settings = isHighlighter ? highlighterSettings : penSettings;
+
+    const group = document.createElement("div");
+    group.className = "tool-options-group";
+
+    const colorLabel = document.createElement("span");
+    colorLabel.className = "tool-options-label";
+    colorLabel.textContent = "Color";
+    group.appendChild(colorLabel);
+
+    const row = document.createElement("div");
+    row.className = "color-swatch-row";
+
+    const colors = isHighlighter
+      ? ["#facc15", "#fb7185", "#22c55e", "#38bdf8", "#e5e7eb", "#a855f7", "#ffffff"]
+      : [
+          // row 1
+          "#000000", // black
+          "#1f2937", // dark gray
+          "#2563eb", // blue
+          "#dc2626", // red
+          "#16a34a", // green
+          "#ea580c", // orange
+          "#eab308", // yellow
+          "#7c3aed", // purple
+          // row 2
+          "#f97316", // light orange
+          "#22c55e", // light green
+          "#0ea5e9", // cyan
+          "#ec4899", // pink
+          "#6366f1", // indigo
+          "#facc15", // bright yellow
+          "#9ca3af", // light gray
+          "#ffffff", // white
+        ];
+
+    colors.forEach((color) => {
+      const swatch = document.createElement("button");
+      swatch.type = "button";
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = color;
+      if (settings.color === color) {
+        swatch.classList.add("color-swatch--active");
+      }
+      swatch.addEventListener("click", () => {
+        settings.color = color;
+        row
+          .querySelectorAll(".color-swatch")
+          .forEach((el) => el.classList.remove("color-swatch--active"));
+        swatch.classList.add("color-swatch--active");
+      });
+      row.appendChild(swatch);
+    });
+
+    group.appendChild(row);
+
+    const widthLabel = document.createElement("label");
+    widthLabel.className = "tool-options-label";
+    widthLabel.textContent = "Thickness";
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = isHighlighter ? "6" : "2";
+    slider.max = isHighlighter ? "24" : "10";
+    slider.value = String(settings.width);
+    slider.className = "slider-input";
+    slider.addEventListener("input", () => {
+      settings.width = Number(slider.value);
+    });
+
+    group.appendChild(widthLabel);
+    group.appendChild(slider);
+
+    if (!isHighlighter) {
+      const imageLabel = document.createElement("span");
+      imageLabel.className = "tool-options-label";
+      imageLabel.textContent = "Background image";
+      imageLabel.style.marginTop = "0.5rem";
+      group.appendChild(imageLabel);
+
+      const imageRow = document.createElement("div");
+      imageRow.className = "color-swatch-row";
+
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.textContent = "Add / replace image";
+      addBtn.style.fontSize = "0.75rem";
+      addBtn.style.padding = "0.3rem 0.7rem";
+      addBtn.style.borderRadius = "999px";
+      addBtn.style.border = "none";
+      addBtn.style.cursor = "pointer";
+      addBtn.style.backgroundColor = "#22c55e";
+      addBtn.style.color = "#020617";
+      addBtn.addEventListener("click", () => {
+        ensureImageFileInput();
+        if (imageFileInput) {
+          imageFileInput.click();
+        }
+      });
+      imageRow.appendChild(addBtn);
+
+      const page = pages[currentPageIndex];
+      if (page && page.background && page.background.dataUrl) {
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.textContent = "Remove image";
+        removeBtn.style.fontSize = "0.75rem";
+        removeBtn.style.padding = "0.3rem 0.7rem";
+        removeBtn.style.borderRadius = "999px";
+        removeBtn.style.border = "none";
+        removeBtn.style.cursor = "pointer";
+        removeBtn.style.backgroundColor = "#111827";
+        removeBtn.style.color = "#e5e7eb";
+        removeBtn.addEventListener("click", () => {
+          const p = pages[currentPageIndex];
+          if (!p) return;
+          if (p.background && p.background.dataUrl) {
+            imageCache.delete(p.background.dataUrl);
+          }
+          p.background = null;
+          updateBoardAppearance();
+          handleToolSelection("pen");
+        });
+        imageRow.appendChild(removeBtn);
+      }
+
+      group.appendChild(imageRow);
+
+      const stampLabel = document.createElement("span");
+      stampLabel.className = "tool-options-label";
+      stampLabel.textContent = "Insert image as object";
+      stampLabel.style.marginTop = "0.5rem";
+      group.appendChild(stampLabel);
+
+      const stampRow = document.createElement("div");
+      stampRow.className = "color-swatch-row";
+      const stampBtn = document.createElement("button");
+      stampBtn.type = "button";
+      stampBtn.textContent = "Add image on board";
+      stampBtn.style.fontSize = "0.75rem";
+      stampBtn.style.padding = "0.3rem 0.7rem";
+      stampBtn.style.borderRadius = "999px";
+      stampBtn.style.border = "none";
+      stampBtn.style.cursor = "pointer";
+      stampBtn.style.backgroundColor = "#38bdf8";
+      stampBtn.style.color = "#020617";
+      stampBtn.addEventListener("click", () => {
+        ensureShapeImageFileInput();
+        if (shapeImageFileInput) {
+          shapeImageFileInput.click();
+        }
+      });
+      stampRow.appendChild(stampBtn);
+      group.appendChild(stampRow);
+    }
+
+    propertiesContent.appendChild(group);
+  }
+
+  function renderEraserOptions() {
+    const group = document.createElement("div");
+    group.className = "tool-options-group";
+
+    const label = document.createElement("label");
+    label.className = "tool-options-label";
+    label.textContent = "Eraser size";
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "6";
+    slider.max = "60";
+    slider.value = String(eraserRadius);
+    slider.className = "slider-input";
+    slider.addEventListener("input", () => {
+      eraserRadius = Number(slider.value);
+    });
+
+    group.appendChild(label);
+    group.appendChild(slider);
+    propertiesContent.appendChild(group);
+  }
+
+  function renderShapeOptions() {
+    const group = document.createElement("div");
+    group.className = "tool-options-group";
+
+    const typeLabel = document.createElement("span");
+    typeLabel.className = "tool-options-label";
+    typeLabel.textContent = "Shape type";
+    group.appendChild(typeLabel);
+
+    const typeRow = document.createElement("div");
+    typeRow.className = "color-swatch-row";
+
+    const shapeOptions = [
+      { id: "line", title: "Line" },
+      { id: "ray", title: "Ray" },
+      { id: "rectangle", title: "Rectangle" },
+      { id: "circle", title: "Circle" },
+      { id: "triangle", title: "Triangle" },
+      { id: "rhombus", title: "Rhombus" },
+      { id: "pentagon", title: "Pentagon" },
+      { id: "hexagon", title: "Hexagon" },
+      { id: "parallelogram", title: "Parallelogram" },
+      { id: "trapezium", title: "Trapezium" },
+      { id: "star", title: "Star" },
+      { id: "cube", title: "Cube" },
+      { id: "cuboid", title: "Cuboid" },
+      { id: "cylinder", title: "Cylinder" },
+      { id: "cone", title: "Cone" },
+      { id: "sphere", title: "Sphere" },
+      { id: "pie3d", title: "3D Pie" },
+    ];
+
+    shapeOptions.forEach((option) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "option-icon-btn";
+      btn.appendChild(createShapeIconSvg(option.id));
+      btn.title = option.title;
+      btn.style.width = "40px";
+      btn.style.minWidth = "40px";
+      btn.style.height = "40px";
+      btn.style.minHeight = "40px";
+      btn.style.padding = "0";
+      btn.style.borderRadius = "8px";
+      btn.style.border = "none";
+      btn.style.cursor = "pointer";
+      btn.style.display = "flex";
+      btn.style.alignItems = "center";
+      btn.style.justifyContent = "center";
+      btn.style.flexShrink = "0";
+      btn.style.backgroundColor =
+        shapeSettings.type === option.id ? "#22c55e" : "#020617";
+      btn.style.color =
+        shapeSettings.type === option.id ? "#020617" : "#e5e7eb";
+
+      btn.addEventListener("click", () => {
+        shapeSettings.type = option.id;
+        Array.from(typeRow.children).forEach((child) => {
+          child.style.backgroundColor = "#020617";
+          child.style.color = "#e5e7eb";
+        });
+        btn.style.backgroundColor = "#22c55e";
+        btn.style.color = "#020617";
+      });
+
+      typeRow.appendChild(btn);
+    });
+
+    group.appendChild(typeRow);
+
+    const colorLabel = document.createElement("span");
+    colorLabel.className = "tool-options-label";
+    colorLabel.textContent = "Outline color";
+    group.appendChild(colorLabel);
+
+    const colorRow = document.createElement("div");
+    colorRow.className = "color-swatch-row";
+    const colors = [
+      "#0f172a",
+      "#2563eb",
+      "#dc2626",
+      "#16a34a",
+      "#ea580c",
+      "#eab308",
+      "#ffffff",
+    ];
+
+    colors.forEach((color) => {
+      const swatch = document.createElement("button");
+      swatch.type = "button";
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = color;
+      if (shapeSettings.color === color) {
+        swatch.classList.add("color-swatch--active");
+      }
+      swatch.addEventListener("click", () => {
+        shapeSettings.color = color;
+        colorRow
+          .querySelectorAll(".color-swatch")
+          .forEach((el) => el.classList.remove("color-swatch--active"));
+        swatch.classList.add("color-swatch--active");
+      });
+      colorRow.appendChild(swatch);
+    });
+
+    group.appendChild(colorRow);
+
+    const fillLabel = document.createElement("span");
+    fillLabel.className = "tool-options-label";
+    fillLabel.textContent = "Fill";
+    group.appendChild(fillLabel);
+
+    const fillRow = document.createElement("div");
+    fillRow.className = "color-swatch-row";
+
+    ["hollow", "solid"].forEach((mode) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = mode === "hollow" ? "Outline" : "Solid";
+      btn.style.fontSize = "0.7rem";
+      btn.style.padding = "0.2rem 0.6rem";
+      btn.style.borderRadius = "999px";
+      btn.style.border = "none";
+      btn.style.cursor = "pointer";
+      btn.style.backgroundColor =
+        shapeSettings.fillMode === mode ? "#22c55e" : "#020617";
+      btn.style.color =
+        shapeSettings.fillMode === mode ? "#020617" : "#e5e7eb";
+
+      btn.addEventListener("click", () => {
+        shapeSettings.fillMode = mode;
+        Array.from(fillRow.children).forEach((child) => {
+          child.style.backgroundColor = "#020617";
+          child.style.color = "#e5e7eb";
+        });
+        btn.style.backgroundColor = "#22c55e";
+        btn.style.color = "#020617";
+      });
+
+      fillRow.appendChild(btn);
+    });
+
+    group.appendChild(fillRow);
+
+    const widthLabel = document.createElement("label");
+    widthLabel.className = "tool-options-label";
+    widthLabel.textContent = "Stroke width";
+
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "1";
+    slider.max = "8";
+    slider.value = String(shapeSettings.width);
+    slider.className = "slider-input";
+    slider.addEventListener("input", () => {
+      shapeSettings.width = Number(slider.value);
+    });
+
+    group.appendChild(widthLabel);
+    group.appendChild(slider);
+
+    propertiesContent.appendChild(group);
+  }
+
+  function renderStampOptions() {
+    const stampsGroup = document.createElement("div");
+    stampsGroup.className = "tool-options-group";
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.textContent = "Add image to library...";
+    addBtn.style.fontSize = "0.8rem";
+    addBtn.style.padding = "0.35rem 0.8rem";
+    addBtn.style.borderRadius = "999px";
+    addBtn.style.border = "none";
+    addBtn.style.cursor = "pointer";
+    addBtn.style.backgroundColor = "#22c55e";
+    addBtn.style.color = "#020617";
+    addBtn.addEventListener("click", () => {
+      ensureUserStampFileInput();
+      userStampFileInput?.click();
+    });
+    stampsGroup.appendChild(addBtn);
+
+    const list = document.createElement("div");
+    list.className = "color-swatch-row";
+    list.style.marginTop = "0.4rem";
+    list.style.flexWrap = "wrap";
+
+    if (!userStamps.length) {
+      const empty = document.createElement("p");
+      empty.style.fontSize = "0.75rem";
+      empty.style.color = "#6b7280";
+      empty.style.margin = "0.3rem 0 0 0";
+      empty.textContent = "No saved images yet.";
+      stampsGroup.appendChild(empty);
+    } else {
+      userStamps.forEach((stamp) => {
+        const item = document.createElement("div");
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.gap = "0.2rem";
+
+        const placeBtn = document.createElement("button");
+        placeBtn.type = "button";
+        placeBtn.title = stamp.label || "Place on board";
+        placeBtn.style.display = "inline-flex";
+        placeBtn.style.alignItems = "center";
+        placeBtn.style.justifyContent = "center";
+        placeBtn.style.padding = "0.25rem";
+        placeBtn.style.borderRadius = "0.75rem";
+        placeBtn.style.border = "1px solid #111827";
+        placeBtn.style.cursor = "pointer";
+        placeBtn.style.backgroundColor = "#020617";
+        const thumb = document.createElement("img");
+        thumb.src = stamp.dataUrl;
+        thumb.alt = stamp.label || "Image";
+        thumb.style.width = "48px";
+        thumb.style.height = "48px";
+        thumb.style.objectFit = "cover";
+        thumb.style.borderRadius = "0.75rem";
+        placeBtn.appendChild(thumb);
+        placeBtn.addEventListener("click", () => {
+          const page = pages[currentPageIndex];
+          if (!page) return;
+          if (!page.shapes) page.shapes = [];
+          const scale = window.devicePixelRatio || 1;
+          const logicalW = boardCanvas.width / (scale * zoom);
+          const logicalH = boardCanvas.height / (scale * zoom);
+          const cx = logicalW / 2;
+          const cy = logicalH / 2;
+          const halfW = 150;
+          const halfH = 150;
+          const newShape = {
+            type: "image",
+            color: "#ffffff",
+            width: 1,
+            fillMode: "solid",
+            dataUrl: stamp.dataUrl,
+            start: { x: cx - halfW, y: cy - halfH },
+            end: { x: cx + halfW, y: cy + halfH },
+          };
+          page.shapes.push(newShape);
+          currentTool = "select";
+          selectedShapes = [newShape];
+          selectedTexts = [];
+          toolButtons.forEach((btn) => {
+            const isActive = btn.getAttribute("data-tool") === "select";
+            btn.classList.toggle("tool-button--active", isActive);
+          });
+          updateBoardAppearance();
+          if (propertiesContent) handleToolSelection("select");
+        });
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.textContent = "X";
+        delBtn.style.fontSize = "0.75rem";
+        delBtn.style.padding = "0.1rem 0.45rem";
+        delBtn.style.borderRadius = "999px";
+        delBtn.style.border = "none";
+        delBtn.style.cursor = "pointer";
+        delBtn.style.backgroundColor = "#4b5563";
+        delBtn.style.color = "#f9fafb";
+        delBtn.addEventListener("click", () => {
+          userStamps = userStamps.filter((s) => s.id !== stamp.id);
+          saveUserStamps();
+          if (currentTool === "stamps" && propertiesContent) {
+            handleToolSelection("stamps");
+          }
+        });
+
+        item.appendChild(placeBtn);
+        item.appendChild(delBtn);
+        list.appendChild(item);
+      });
+      stampsGroup.appendChild(list);
+    }
+
+    propertiesContent.appendChild(stampsGroup);
+  }
+
+  function renderTextOptions() {
+    const group = document.createElement("div");
+    group.className = "tool-options-group";
+    const fontLabel = document.createElement("span");
+    fontLabel.className = "tool-options-label";
+    fontLabel.textContent = "Font";
+    group.appendChild(fontLabel);
+    const fontSelect = document.createElement("select");
+    fontSelect.style.width = "100%";
+    fontSelect.style.padding = "0.3rem";
+    fontSelect.style.fontSize = "0.8rem";
+    fontSelect.style.background = "#020617";
+    fontSelect.style.color = "#e5e7eb";
+    fontSelect.style.border = "1px solid #111827";
+    fontSelect.style.borderRadius = "6px";
+    FONT_OPTIONS.forEach((f) => {
+      const opt = document.createElement("option");
+      opt.value = f;
+      opt.textContent = f;
+      if (textSettings.fontFamily === f) opt.selected = true;
+      fontSelect.appendChild(opt);
+    });
+    fontSelect.addEventListener("change", () => { textSettings.fontFamily = fontSelect.value; });
+    group.appendChild(fontSelect);
+    const styleRow = document.createElement("div");
+    styleRow.className = "color-swatch-row";
+    styleRow.style.marginTop = "0.35rem";
+    [
+      { key: "bold", label: "B", title: "Bold", style: (v) => ({ fontWeight: v ? "700" : "400" }) },
+      { key: "italic", label: "I", title: "Italic", style: (v) => ({ fontStyle: v ? "italic" : "normal" }) },
+      { key: "underline", label: "U", title: "Underline", style: (v) => ({ textDecoration: v ? "underline" : "none" }) },
+    ].forEach(({ key, label, title, style }) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = label;
+      btn.title = title;
+      Object.assign(btn.style, { width: "32px", height: "28px", padding: "0", borderRadius: "6px", border: "none", cursor: "pointer", fontSize: "0.9rem" }, style(!!textSettings[key]));
+      btn.style.backgroundColor = textSettings[key] ? "#22c55e" : "#020617";
+      btn.style.color = textSettings[key] ? "#020617" : "#e5e7eb";
+      btn.addEventListener("click", () => {
+        textSettings[key] = !textSettings[key];
+        Object.assign(btn.style, style(textSettings[key]));
+        btn.style.backgroundColor = textSettings[key] ? "#22c55e" : "#020617";
+        btn.style.color = textSettings[key] ? "#020617" : "#e5e7eb";
+      });
+      styleRow.appendChild(btn);
+    });
+    group.appendChild(styleRow);
+    const colorLabel = document.createElement("span");
+    colorLabel.className = "tool-options-label";
+    colorLabel.textContent = "Color";
+    colorLabel.style.marginTop = "0.35rem";
+    group.appendChild(colorLabel);
+    const colorRow = document.createElement("div");
+    colorRow.className = "color-swatch-row";
+    const colors = ["#0f172a", "#2563eb", "#dc2626", "#16a34a", "#ea580c", "#eab308", "#ffffff"];
+    colors.forEach((color) => {
+      const swatch = document.createElement("button");
+      swatch.type = "button";
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = color;
+      if (textSettings.color === color) swatch.classList.add("color-swatch--active");
+      swatch.addEventListener("click", () => {
+        textSettings.color = color;
+        colorRow.querySelectorAll(".color-swatch").forEach((el) => el.classList.remove("color-swatch--active"));
+        swatch.classList.add("color-swatch--active");
+      });
+      colorRow.appendChild(swatch);
+    });
+    group.appendChild(colorRow);
+    const sizeLabel = document.createElement("label");
+    sizeLabel.className = "tool-options-label";
+    sizeLabel.textContent = "Font size";
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "14";
+    slider.max = "96";
+    slider.value = String(textSettings.fontSize);
+    slider.className = "slider-input";
+    slider.addEventListener("input", () => { textSettings.fontSize = Number(slider.value); });
+    group.appendChild(sizeLabel);
+    group.appendChild(slider);
+    const hint = document.createElement("p");
+    hint.style.fontSize = "0.75rem";
+    hint.style.color = "#9ca3af";
+    hint.style.margin = "0.5rem 0 0 0";
+    hint.textContent = "Click on the board to add a text box.";
+    group.appendChild(hint);
+    propertiesContent.appendChild(group);
+  }
+
+  function renderStickyOptions() {
+    if (!propertiesContent) return;
+    const wrap = document.createElement("div");
+    wrap.className = "tool-options-group";
+    const p = document.createElement("p");
+    p.style.fontSize = "0.8rem";
+    p.style.color = "#9ca3af";
+    p.style.margin = "0 0 0.5rem 0";
+    p.textContent = "Click on the board to add a sticky note. Choose a color below.";
+    wrap.appendChild(p);
+    const colorLabel = document.createElement("span");
+    colorLabel.className = "tool-options-label";
+    colorLabel.textContent = "Sticky color";
+    colorLabel.style.marginTop = "0.25rem";
+    wrap.appendChild(colorLabel);
+    const colorRow = document.createElement("div");
+    colorRow.className = "color-swatch-row";
+    colorRow.style.marginTop = "0.25rem";
+    colorRow.style.flexWrap = "wrap";
+    colorRow.style.gap = "0.35rem";
+    const stickyColors = [
+      "#fef08a", "#fde047", "#facc15", "#fcd34d",
+      "#fbcfe8", "#f9a8d4", "#f472b6",
+      "#bbf7d0", "#86efac", "#4ade80",
+      "#bfdbfe", "#93c5fd", "#60a5fa",
+      "#fed7aa", "#fdba74", "#fb923c",
+      "#e9d5ff", "#d8b4fe", "#c084fc",
+    ];
+    stickyColors.forEach((color) => {
+      const swatch = document.createElement("button");
+      swatch.type = "button";
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = color;
+      swatch.style.border = (stickyNotesSettings.color === color) ? "2px solid #e5e7eb" : "1px solid #374151";
+      swatch.style.width = "28px";
+      swatch.style.height = "28px";
+      swatch.style.borderRadius = "6px";
+      swatch.style.cursor = "pointer";
+      swatch.title = color;
+      swatch.addEventListener("click", () => {
+        stickyNotesSettings.color = color;
+        colorRow.querySelectorAll("button").forEach((b) => {
+          b.style.border = (b === swatch) ? "2px solid #e5e7eb" : "1px solid #374151";
+        });
+      });
+      colorRow.appendChild(swatch);
+    });
+    wrap.appendChild(colorRow);
+    propertiesContent.appendChild(wrap);
+  }
+
+  function getVisibleBoardCenter() {
+    const container = boardCanvas && boardCanvas.closest(".canvas-container");
+    if (!container) {
+      const scale = window.devicePixelRatio || 1;
+      const logicalW = boardCanvas ? boardCanvas.width / (scale * zoom) : 800;
+      const logicalH = boardCanvas ? boardCanvas.height / (scale * zoom) : 600;
+      return { x: logicalW / 2, y: logicalH / 2 };
+    }
+    const scrollTop = container.scrollTop;
+    const clientHeight = container.clientHeight;
+    const scale = window.devicePixelRatio || 1;
+    const logicalW = boardCanvas ? boardCanvas.width / (scale * zoom) : 800;
+    return {
+      x: logicalW / 2,
+      y: (scrollTop + clientHeight / 2) / zoom,
+    };
+  }
+
+  function insertMathSnippet(text) {
+    if (!boardCanvas) return;
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    if (!page.texts) page.texts = [];
+    const { x: centerX, y: centerY } = getVisibleBoardCenter();
+    const x = centerX - (text.length * (textSettings.fontSize * 0.3));
+    const y = centerY - textSettings.fontSize;
+    pushUndo();
+    const item = {
+      id: generateId(),
+      x,
+      y,
+      text,
+      color: textSettings.color,
+      fontSize: textSettings.fontSize,
+      fontFamily: textSettings.fontFamily,
+      bold: textSettings.bold,
+      italic: textSettings.italic,
+      underline: textSettings.underline,
+    };
+    page.texts.push(item);
+    currentTool = "select";
+    selectedShapes = [];
+    selectedTexts = [item];
+    toolButtons.forEach((btn) => {
+      const isActive = btn.getAttribute("data-tool") === "select";
+      btn.classList.toggle("tool-button--active", isActive);
+    });
+    updateBoardAppearance();
+    if (propertiesContent) handleToolSelection("select");
+  }
+
+  function renderMathSymbolsOptions() {
+    if (!propertiesContent) return;
+    const wrap = document.createElement("div");
+    wrap.className = "tool-options-group";
+    const info = document.createElement("p");
+    info.style.fontSize = "0.8rem";
+    info.style.color = "#9ca3af";
+    info.style.margin = "0 0 0.5rem 0";
+    info.textContent = "Tap a symbol to add it to the board. You can move or resize it with the Pointer tool.";
+    wrap.appendChild(info);
+    const groups = [
+      { label: "Greek letters", items: ["α", "β", "γ", "θ", "λ", "μ", "π", "σ", "Ω"] },
+      { label: "Operators", items: ["+", "−", "×", "÷", "=", "≠", "≈", "∝"] },
+      { label: "Relations / sets", items: ["<", "≤", ">", "≥", "∈", "∉", "⊂", "⊆"] },
+      { label: "Common expressions", items: ["x²", "y²", "a² + b² = c²", "√x", "∑", "∫", "lim", "∞"] },
+    ];
+    groups.forEach((groupDef) => {
+      const groupLabel = document.createElement("span");
+      groupLabel.className = "tool-options-label";
+      groupLabel.textContent = groupDef.label;
+      wrap.appendChild(groupLabel);
+      const row = document.createElement("div");
+      row.className = "color-swatch-row";
+      row.style.flexWrap = "wrap";
+      groupDef.items.forEach((sym) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = sym;
+        btn.style.fontSize = "0.9rem";
+        btn.style.padding = "0.25rem 0.5rem";
+        btn.style.borderRadius = "999px";
+        btn.style.border = "1px solid #111827";
+        btn.style.backgroundColor = "#020617";
+        btn.style.color = "#e5e7eb";
+        btn.style.cursor = "pointer";
+        btn.style.marginBottom = "0.2rem";
+        btn.addEventListener("click", () => { insertMathSnippet(sym); });
+        row.appendChild(btn);
+      });
+      wrap.appendChild(row);
+    });
+    propertiesContent.appendChild(wrap);
+  }
+
+  function syncPageStrip() {
+    if (!pagesStrip) return;
+    pagesStrip.innerHTML = "";
+    pages.forEach((_, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "page-thumbnail";
+      btn.textContent = String(i + 1);
+      btn.dataset.index = String(i);
+      pagesStrip.appendChild(btn);
+    });
+    const buttons = pagesStrip.querySelectorAll(".page-thumbnail");
+    buttons.forEach((btn, i) => {
+      btn.classList.toggle("page-thumbnail--active", i === currentPageIndex);
+    });
+  }
+
+  function deletePage(index) {
+    if (pages.length <= 1 || index < 0 || index >= pages.length) return;
+    pages.splice(index, 1);
+    if (undoStacks[index] != null) undoStacks.splice(index, 1);
+    if (redoStacks[index] != null) redoStacks.splice(index, 1);
+    if (currentPageIndex >= pages.length) currentPageIndex = Math.max(0, pages.length - 1);
+    else if (currentPageIndex > index) currentPageIndex--;
+    syncPageStrip();
+    selectPage(currentPageIndex);
+  }
+
+  function addNewPage() {
+    const newIndex = pages.length;
+    pages[newIndex] = { strokes: [], shapes: [], texts: [], background: null };
+    syncPageStrip();
+    selectPage(newIndex);
+  }
+
+  function selectPage(index) {
+    currentPageIndex = index;
+    selectedShapes = [];
+    selectedTexts = [];
+    const buttons = pagesStrip.querySelectorAll(".page-thumbnail");
+    buttons.forEach((btn, i) => {
+      btn.classList.toggle("page-thumbnail--active", i === index);
+    });
+    updateBoardInfoLabel();
+    updateBoardAppearance();
+    if (currentTool === "select" && propertiesContent) handleToolSelection("select");
+  }
+
+  function getCanvasPoint(evt) {
+    const rect = boardCanvas.getBoundingClientRect();
+    const scale = window.devicePixelRatio || 1;
+    const logicalWidth = boardCanvas.width / scale;
+    const logicalHeight = boardCanvas.height / scale;
+
+    const xRatio = (evt.clientX - rect.left) / rect.width;
+    const yRatio = (evt.clientY - rect.top) / rect.height;
+
+    return {
+      x: (xRatio * logicalWidth) / zoom,
+      y: (yRatio * logicalHeight) / zoom,
+    };
+  }
+
+  function interpolatePoints(p1, p2, maxSegmentLen) {
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist <= maxSegmentLen) return [p1, p2];
+    const n = Math.max(2, Math.ceil(dist / maxSegmentLen));
+    const out = [p1];
+    for (let i = 1; i < n; i++) {
+      const t = i / n;
+      out.push({ x: p1.x + dx * t, y: p1.y + dy * t });
+    }
+    out.push(p2);
+    return out;
+  }
+
+  function drawSmoothStrokePath(ctx, points) {
+    if (!points || points.length < 2) return;
+    ctx.moveTo(points[0].x, points[0].y);
+    if (points.length === 2) {
+      ctx.lineTo(points[1].x, points[1].y);
+      return;
+    }
+    for (let i = 1; i < points.length - 1; i++) {
+      const c = points[i];
+      const next = points[i + 1];
+      const endX = (c.x + next.x) / 2;
+      const endY = (c.y + next.y) / 2;
+      ctx.quadraticCurveTo(c.x, c.y, endX, endY);
+    }
+    ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+  }
+
+  function hitTestShape(point) {
+    const page = pages[currentPageIndex];
+    if (!page || !page.shapes) return null;
+    const padding = 8;
+    for (let i = page.shapes.length - 1; i >= 0; i--) {
+      const shape = page.shapes[i];
+      const { start, end } = shape;
+      if (!start || !end) continue;
+      const x1 = Math.min(start.x, end.x) - padding;
+      const y1 = Math.min(start.y, end.y) - padding;
+      const x2 = Math.max(start.x, end.x) + padding;
+      const y2 = Math.max(start.y, end.y) + padding;
+      if (point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2) {
+        return { shape, index: i };
+      }
+    }
+    return null;
+  }
+
+  function shapesInBox(box) {
+    const page = pages[currentPageIndex];
+    if (!page || !page.shapes) return [];
+    const { start, end } = box;
+    const bx1 = Math.min(start.x, end.x);
+    const by1 = Math.min(start.y, end.y);
+    const bx2 = Math.max(start.x, end.x);
+    const by2 = Math.max(start.y, end.y);
+    return page.shapes.filter((shape) => {
+      const { start: s, end: e } = shape;
+      if (!s || !e) return false;
+      const sx1 = Math.min(s.x, e.x);
+      const sy1 = Math.min(s.y, e.y);
+      const sx2 = Math.max(s.x, e.x);
+      const sy2 = Math.max(s.y, e.y);
+      return !(sx2 < bx1 || sx1 > bx2 || sy2 < by1 || sy1 > by2);
+    });
+  }
+
+  function getTextBounds(item) {
+    const fs = item.fontSize ?? 24;
+    if (item.sticky) {
+      const maxW = item.w ?? stickyNotesSettings.maxWidth ?? 220;
+      const { width, height } = wrapStickyText(item, maxW);
+      return {
+        x: item.x,
+        y: item.y,
+        w: item.w ?? width,
+        h: item.h ?? height,
+      };
+    }
+    if (item.w != null && item.h != null) {
+      return { x: item.x, y: item.y, w: item.w, h: item.h };
+    }
+    const w = Math.max(20, (item.text || "").length * fs * 0.6);
+    return { x: item.x, y: item.y, w, h: fs };
+  }
+
+  function hitTestText(point) {
+    const page = pages[currentPageIndex];
+    if (!page || !page.texts) return null;
+    for (let i = page.texts.length - 1; i >= 0; i--) {
+      const item = page.texts[i];
+      const b = getTextBounds(item);
+      const pad = item.sticky ? 14 : 8;
+      if (point.x >= b.x - pad && point.x <= b.x + b.w + pad && point.y >= b.y - pad && point.y <= b.y + b.h + pad) {
+        return { item, index: i };
+      }
+    }
+    return null;
+  }
+
+  function textsInBox(box) {
+    const page = pages[currentPageIndex];
+    if (!page || !page.texts) return [];
+    const { start, end } = box;
+    const bx1 = Math.min(start.x, end.x);
+    const by1 = Math.min(start.y, end.y);
+    const bx2 = Math.max(start.x, end.x);
+    const by2 = Math.max(start.y, end.y);
+    return page.texts.filter((item) => {
+      const b = getTextBounds(item);
+      const pad = item.sticky ? 12 : 0;
+      const x1 = b.x - pad, y1 = b.y - pad, x2 = b.x + b.w + pad, y2 = b.y + b.h + pad;
+      return !(x2 < bx1 || x1 > bx2 || y2 < by1 || y1 > by2);
+    });
+  }
+
+  function duplicateSelected() {
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    if (!page.shapes) page.shapes = [];
+    if (!page.texts) page.texts = [];
+    const hasAny = (selectedShapes && selectedShapes.length) || (selectedTexts && selectedTexts.length);
+    if (!hasAny) return;
+    pushUndo();
+    const newShapes = [];
+    const newTexts = [];
+    const OFFSET = 20;
+
+    if (selectedShapes.length) {
+      const set = new Set(selectedShapes);
+      for (const shape of page.shapes) {
+        if (!set.has(shape)) continue;
+        const clone = JSON.parse(JSON.stringify(shape));
+        clone.id = generateId();
+        clone.locked = false;
+        if (clone.start && clone.end) {
+          clone.start = { x: clone.start.x + OFFSET, y: clone.start.y + OFFSET };
+          clone.end = { x: clone.end.x + OFFSET, y: clone.end.y + OFFSET };
+        }
+        if (clone.type === "group" && clone.children) {
+          (clone.children.shapes || []).forEach((s) => {
+            s.id = generateId();
+            if (s.start) { s.start.x += OFFSET; s.start.y += OFFSET; }
+            if (s.end) { s.end.x += OFFSET; s.end.y += OFFSET; }
+          });
+          (clone.children.texts || []).forEach((t) => {
+            t.id = generateId();
+            t.x = (t.x || 0) + OFFSET;
+            t.y = (t.y || 0) + OFFSET;
+          });
+        }
+        newShapes.push(clone);
+      }
+      page.shapes = page.shapes.concat(newShapes);
+      selectedShapes = newShapes;
+    }
+    if (selectedTexts.length) {
+      const setT = new Set(selectedTexts);
+      for (const t of page.texts) {
+        if (!setT.has(t)) continue;
+        const cloneT = JSON.parse(JSON.stringify(t));
+        cloneT.id = generateId();
+        cloneT.locked = false;
+        cloneT.x += OFFSET;
+        cloneT.y += OFFSET;
+        newTexts.push(cloneT);
+      }
+      page.texts = page.texts.concat(newTexts);
+      selectedTexts = newTexts;
+    }
+    updateBoardAppearance();
+    if (propertiesContent && currentTool === "select") handleToolSelection("select");
+  }
+
+  function lockSelected() {
+    if (selectedShapes.length === 0 && selectedTexts.length === 0) return;
+    pushUndo();
+    selectedShapes.forEach((s) => { s.locked = true; });
+    selectedTexts.forEach((t) => { t.locked = true; });
+    updateBoardAppearance();
+    if (propertiesContent && currentTool === "select") handleToolSelection("select");
+  }
+
+  function unlockSelected() {
+    if (selectedShapes.length === 0 && selectedTexts.length === 0) return;
+    pushUndo();
+    selectedShapes.forEach((s) => { s.locked = false; delete s.locked; });
+    selectedTexts.forEach((t) => { t.locked = false; delete t.locked; });
+    updateBoardAppearance();
+    if (propertiesContent && currentTool === "select") handleToolSelection("select");
+  }
+
+  function groupSelected() {
+    const total = (selectedShapes.length || 0) + (selectedTexts.length || 0);
+    if (total < 2) return;
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    pushUndo();
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    selectedShapes.forEach((s) => {
+      if (!s.start || !s.end) return;
+      x1 = Math.min(x1, s.start.x, s.end.x);
+      y1 = Math.min(y1, s.start.y, s.end.y);
+      x2 = Math.max(x2, s.start.x, s.end.x);
+      y2 = Math.max(y2, s.start.y, s.end.y);
+    });
+    selectedTexts.forEach((t) => {
+      const b = getTextBounds(t);
+      x1 = Math.min(x1, b.x);
+      y1 = Math.min(y1, b.y);
+      x2 = Math.max(x2, b.x + b.w);
+      y2 = Math.max(y2, b.y + b.h);
+    });
+    const pad = 8;
+    const group = {
+      type: "group",
+      id: generateId(),
+      start: { x: x1 - pad, y: y1 - pad },
+      end: { x: x2 + pad, y: y2 + pad },
+      children: {
+        shapes: selectedShapes.slice(),
+        texts: selectedTexts.slice(),
+      },
+    };
+    if (!page.shapes) page.shapes = [];
+    if (!page.texts) page.texts = [];
+    page.shapes = page.shapes.filter((s) => !selectedShapes.includes(s));
+    page.texts = page.texts.filter((t) => !selectedTexts.includes(t));
+    page.shapes.push(group);
+    selectedShapes = [group];
+    selectedTexts = [];
+    updateBoardAppearance();
+    if (propertiesContent && currentTool === "select") handleToolSelection("select");
+  }
+
+  function ungroupSelected() {
+    if (selectedShapes.length !== 1 || selectedTexts.length !== 0) return;
+    const group = selectedShapes[0];
+    if (!group || group.type !== "group" || !group.children) return;
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    pushUndo();
+    const childShapes = group.children.shapes || [];
+    const childTexts = group.children.texts || [];
+    if (!page.shapes) page.shapes = [];
+    if (!page.texts) page.texts = [];
+    page.shapes = page.shapes.filter((s) => s !== group);
+    page.shapes.push(...childShapes);
+    page.texts.push(...childTexts);
+    selectedShapes = childShapes.slice();
+    selectedTexts = childTexts.slice();
+    updateBoardAppearance();
+    if (propertiesContent && currentTool === "select") handleToolSelection("select");
+  }
+
+  function deleteSelected() {
+    if (selectedShapes.length === 0 && selectedTexts.length === 0) return;
+    pushUndo();
+    const page = pages[currentPageIndex];
+    if (page) {
+      if (page.shapes) page.shapes = page.shapes.filter((s) => !selectedShapes.includes(s));
+      if (page.texts) page.texts = page.texts.filter((t) => !selectedTexts.includes(t));
+    }
+    selectedShapes = [];
+    selectedTexts = [];
+    updateBoardAppearance();
+    if (propertiesContent && currentTool === "select") handleToolSelection("select");
+  }
+
+  function handlePointerDown(evt) {
+    if (!boardCanvas) return;
+    if (evt.pointerType === "touch") return; /* tablet: we use touch handlers instead */
+    evt.preventDefault();
+    try { boardCanvas.setPointerCapture(evt.pointerId); } catch (_) {}
+
+    if (currentTool === "pen" || currentTool === "highlighter") {
+      pushUndo();
+      isDrawing = true;
+      const point = getCanvasPoint(evt);
+      const settings = currentTool === "pen" ? penSettings : highlighterSettings;
+      const color = settings.color;
+      const alpha = currentTool === "pen" ? 1 : settings.alpha ?? 0.4;
+      const width = settings.width;
+      activeStroke = {
+        tool: currentTool,
+        color,
+        alpha,
+        width,
+        points: [point],
+      };
+      if (!pages[currentPageIndex]) {
+        pages[currentPageIndex] = { strokes: [], shapes: [], texts: [], background: null };
+      }
+      pages[currentPageIndex].strokes.push(activeStroke);
+    } else if (currentTool === "text") {
+      evt.preventDefault();
+      const point = getCanvasPoint(evt);
+      const page = pages[currentPageIndex];
+      if (!page) return;
+      if (!page.texts) page.texts = [];
+      pushUndo();
+      showInlineTextInput(point);
+    } else if (currentTool === "notes") {
+      evt.preventDefault();
+      const point = getCanvasPoint(evt);
+      const page = pages[currentPageIndex];
+      if (!page) return;
+      if (!page.texts) page.texts = [];
+      pushUndo();
+      showInlineTextInput(point, true);
+    } else if (currentTool === "eraser") {
+      pushUndo();
+      isDrawing = true;
+      handleEraserMove(evt);
+    } else if (currentTool === "shapes") {
+      pushUndo();
+      isDrawing = true;
+      const point = getCanvasPoint(evt);
+      activeShape = {
+        type: shapeSettings.type,
+        color: shapeSettings.color,
+        width: shapeSettings.width,
+        fillMode: shapeSettings.fillMode,
+        start: point,
+        end: point,
+      };
+      updateBoardAppearance();
+    } else if (currentTool === "charts") {
+      pushUndo();
+      isDrawing = true;
+      const point = getCanvasPoint(evt);
+      const chartType = chartSettings.type || "barChart";
+      activeShape = {
+        type: chartType,
+        color: "#374151",
+        width: 2,
+        fillMode: "hollow",
+        start: point,
+        end: point,
+        data: getRandomChartData(chartType),
+      };
+      updateBoardAppearance();
+    } else if (currentTool === "select") {
+      const point = getCanvasPoint(evt);
+
+      // check controls on the selection (order: unlock, duplicate, delete, lock)
+      for (const shape of selectedShapes) {
+        const uh = shape._unlockHandle;
+        if (uh && point.x >= uh.x && point.x <= uh.x + uh.w && point.y >= uh.y && point.y <= uh.y + uh.h) {
+          unlockSelected();
+          return;
+        }
+        const dh = shape._duplicateHandle;
+        if (dh && point.x >= dh.x && point.x <= dh.x + dh.w && point.y >= dh.y && point.y <= dh.y + dh.h) {
+          duplicateSelected();
+          return;
+        }
+        const delH = shape._deleteHandle;
+        if (delH && point.x >= delH.x && point.x <= delH.x + delH.w && point.y >= delH.y && point.y <= delH.y + delH.h) {
+          deleteSelected();
+          return;
+        }
+        const lh = shape._lockHandle;
+        if (lh && point.x >= lh.x && point.x <= lh.x + lh.w && point.y >= lh.y && point.y <= lh.y + lh.h) {
+          lockSelected();
+          return;
+        }
+      }
+      for (const textItem of selectedTexts) {
+        const uh = textItem._unlockHandle;
+        if (uh && point.x >= uh.x && point.x <= uh.x + uh.w && point.y >= uh.y && point.y <= uh.y + uh.h) {
+          unlockSelected();
+          return;
+        }
+        const dh = textItem._duplicateHandle;
+        if (dh && point.x >= dh.x && point.x <= dh.x + dh.w && point.y >= dh.y && point.y <= dh.y + dh.h) {
+          duplicateSelected();
+          return;
+        }
+        const delH = textItem._deleteHandle;
+        if (delH && point.x >= delH.x && point.x <= delH.x + delH.w && point.y >= delH.y && point.y <= delH.y + delH.h) {
+          deleteSelected();
+          return;
+        }
+        const lh = textItem._lockHandle;
+        if (lh && point.x >= lh.x && point.x <= lh.x + lh.w && point.y >= lh.y && point.y <= lh.y + lh.h) {
+          lockSelected();
+          return;
+        }
+      }
+
+      // check resize handles first (shapes, then texts)
+      const page = pages[currentPageIndex];
+      const radius = 12;
+      if (page) {
+        if (page.shapes && page.shapes.length) {
+          for (let i = page.shapes.length - 1; i >= 0; i--) {
+            const sh = page.shapes[i];
+            if (!sh || sh.locked || sh.type === "group" || !sh._resizeHandles || !Array.isArray(sh._resizeHandles)) continue;
+            for (const h of sh._resizeHandles) {
+              const dx = point.x - h.x;
+              const dy = point.y - h.y;
+              if (Math.sqrt(dx * dx + dy * dy) <= radius) {
+                pushUndo();
+                resizeState = {
+                  kind: "shape",
+                  shape: sh,
+                  corner: h.corner,
+                  startBounds: {
+                    start: { x: sh.start.x, y: sh.start.y },
+                    end: { x: sh.end.x, y: sh.end.y },
+                  },
+                };
+                isDrawing = true;
+                isDraggingShape = false;
+                dragShapeStartPoint = null;
+                dragShapeOriginals = null;
+                dragGroupChildrenOriginals = null;
+                dragTextOriginals = null;
+                return;
+              }
+            }
+          }
+        }
+        if (page.texts && page.texts.length) {
+          for (let i = page.texts.length - 1; i >= 0; i--) {
+            const t = page.texts[i];
+            if (!t || t.locked || !t._resizeHandles || !Array.isArray(t._resizeHandles)) continue;
+            for (const h of t._resizeHandles) {
+              const dx = point.x - h.x;
+              const dy = point.y - h.y;
+              if (Math.sqrt(dx * dx + dy * dy) <= radius) {
+                pushUndo();
+                const b = getTextBounds(t);
+                resizeState = {
+                  kind: "text",
+                  text: t,
+                  corner: h.corner,
+                  startBoundsText: { x: b.x, y: b.y, w: b.w, h: b.h },
+                };
+                isDrawing = true;
+                isDraggingShape = false;
+                dragShapeStartPoint = null;
+                dragShapeOriginals = null;
+                dragGroupChildrenOriginals = null;
+                dragTextOriginals = null;
+                return;
+              }
+            }
+          }
+        }
+      }
+
+      const shapeHit = hitTestShape(point);
+      const textHit = hitTestText(point);
+      const shift = evt.shiftKey;
+
+      if (shapeHit) {
+        if (shift) {
+          const idx = selectedShapes.indexOf(shapeHit.shape);
+          if (idx >= 0) {
+            selectedShapes = selectedShapes.slice(0, idx).concat(selectedShapes.slice(idx + 1));
+          } else {
+            selectedShapes = selectedShapes.concat([shapeHit.shape]);
+          }
+          isDrawing = false;
+          isDraggingShape = false;
+          dragShapeStartPoint = null;
+          dragShapeOriginals = null;
+          dragGroupChildrenOriginals = null;
+          dragTextOriginals = null;
+          if (propertiesContent) handleToolSelection("select");
+        } else {
+          if (!selectedShapes.includes(shapeHit.shape)) {
+            selectedShapes = [shapeHit.shape];
+            selectedTexts = [];
+          }
+          const anyLocked = selectedShapes.some((s) => s.locked) || selectedTexts.some((t) => t.locked);
+          if (!anyLocked) {
+            pushUndo();
+            isDrawing = true;
+            isDraggingShape = true;
+            dragShapeStartPoint = point;
+            dragShapeOriginals = selectedShapes.map((s) => ({
+            start: { x: s.start.x, y: s.start.y },
+            end: { x: s.end.x, y: s.end.y },
+          }));
+          dragTextOriginals = selectedTexts.map((t) => ({ x: t.x, y: t.y }));
+          dragGroupChildrenOriginals = null;
+          if (selectedShapes.length === 1 && selectedShapes[0].type === "group" && selectedShapes[0].children) {
+            const g = selectedShapes[0];
+            dragGroupChildrenOriginals = {
+              shapes: (g.children.shapes || []).map((s) => ({
+                start: s.start ? { x: s.start.x, y: s.start.y } : null,
+                end: s.end ? { x: s.end.x, y: s.end.y } : null,
+              })),
+              texts: (g.children.texts || []).map((t) => ({ x: t.x, y: t.y })),
+            };
+          }
+          if (propertiesContent) handleToolSelection("select");
+          }
+        }
+      } else if (textHit) {
+        if (shift) {
+          const idx = selectedTexts.indexOf(textHit.item);
+          if (idx >= 0) {
+            selectedTexts = selectedTexts.slice(0, idx).concat(selectedTexts.slice(idx + 1));
+          } else {
+            selectedTexts = selectedTexts.concat([textHit.item]);
+          }
+          isDrawing = false;
+          isDraggingShape = false;
+          dragShapeStartPoint = null;
+          dragShapeOriginals = null;
+          dragTextOriginals = null;
+          if (propertiesContent) handleToolSelection("select");
+        } else {
+          const isDoubleTap = selectedTexts.length === 1 && selectedTexts[0] === textHit.item &&
+            (Date.now() - lastTextTap.time) < 450 && lastTextTap.item === textHit.item;
+          lastTextTap = { time: Date.now(), item: textHit.item };
+          if (isDoubleTap) {
+            openEditTextInput(textHit.item);
+            updateBoardAppearance();
+            return;
+          }
+          if (!selectedTexts.includes(textHit.item)) {
+            selectedTexts = [textHit.item];
+            selectedShapes = [];
+          }
+          const anyLockedText = selectedShapes.some((s) => s.locked) || selectedTexts.some((t) => t.locked);
+          if (!anyLockedText) {
+            pushUndo();
+            isDrawing = true;
+            isDraggingShape = true;
+            dragShapeStartPoint = point;
+            dragShapeOriginals = [];
+            dragGroupChildrenOriginals = null;
+            dragTextOriginals = selectedTexts.map((t) => ({ x: t.x, y: t.y }));
+            if (propertiesContent) handleToolSelection("select");
+          }
+        }
+      } else {
+        if (shift) {
+          selectedShapes = [];
+          selectedTexts = [];
+          if (propertiesContent) handleToolSelection("select");
+        } else {
+          activeSelectionBox = { start: point, end: point };
+          isDrawing = true;
+        }
+        isDraggingShape = false;
+        dragShapeStartPoint = null;
+        dragShapeOriginals = null;
+        dragGroupChildrenOriginals = null;
+        dragTextOriginals = null;
+      }
+      updateBoardAppearance();
+    }
+  }
+
+  function handlePointerMove(evt) {
+    if (evt.pointerType === "touch") return; /* tablet: we use touch handlers instead */
+    if (!isDrawing) return;
+    evt.preventDefault();
+    if (resizeState && currentTool === "select") {
+      const point = getCanvasPoint(evt);
+      const { kind } = resizeState;
+      if (kind === "shape") {
+        const { shape, corner, startBounds } = resizeState;
+        if (!shape || !startBounds) return;
+
+        const origStart = startBounds.start;
+        const origEnd = startBounds.end;
+        let newStart = { x: origStart.x, y: origStart.y };
+        let newEnd = { x: origEnd.x, y: origEnd.y };
+
+        if (corner === "tl") {
+          newStart.x = point.x;
+          newStart.y = point.y;
+        } else if (corner === "tr") {
+          newEnd.x = point.x;
+          newStart.y = point.y;
+        } else if (corner === "br") {
+          newEnd.x = point.x;
+          newEnd.y = point.y;
+        } else if (corner === "bl") {
+          newStart.x = point.x;
+          newEnd.y = point.y;
+        }
+
+        const minSize = 5;
+        if (Math.abs(newEnd.x - newStart.x) >= minSize && Math.abs(newEnd.y - newStart.y) >= minSize) {
+          shape.start = newStart;
+          shape.end = newEnd;
+        }
+
+        updateBoardAppearance();
+        return;
+      } else if (kind === "text") {
+        const { text, corner, startBoundsText } = resizeState;
+        if (!text || !startBoundsText) return;
+
+        const orig = startBoundsText;
+        let newX = orig.x, newY = orig.y, newW = orig.w, newH = orig.h;
+        if (corner === "tl") {
+          newX = point.x;
+          newY = point.y;
+          newW = orig.x + orig.w - point.x;
+          newH = orig.y + orig.h - point.y;
+        } else if (corner === "tr") {
+          newY = point.y;
+          newW = point.x - orig.x;
+          newH = orig.y + orig.h - point.y;
+        } else if (corner === "br") {
+          newW = point.x - orig.x;
+          newH = point.y - orig.y;
+        } else if (corner === "bl") {
+          newX = point.x;
+          newW = orig.x + orig.w - point.x;
+          newH = point.y - orig.y;
+        }
+        const minSize = 20;
+        if (newW >= minSize && newH >= minSize) {
+          text.x = newX;
+          text.y = newY;
+          text.w = newW;
+          text.h = newH;
+        }
+        updateBoardAppearance();
+        return;
+      }
+    }
+
+    if (currentTool === "pen" || currentTool === "highlighter") {
+      if (!activeStroke) return;
+      const point = getCanvasPoint(evt);
+      const pts = activeStroke.points;
+      const last = pts[pts.length - 1];
+      if (last) {
+        const segs = interpolatePoints(last, point, 8);
+        for (let j = 1; j < segs.length; j++) pts.push(segs[j]);
+      } else {
+        pts.push(point);
+      }
+      updateBoardAppearance();
+    } else if (currentTool === "eraser") {
+      handleEraserMove(evt);
+    } else if (currentTool === "shapes" || currentTool === "charts") {
+      if (!activeShape) return;
+      const point = getCanvasPoint(evt);
+      activeShape.end = point;
+      updateBoardAppearance();
+    } else if (currentTool === "select" && isDraggingShape && dragShapeStartPoint && (selectedShapes.length || selectedTexts.length)) {
+      const point = getCanvasPoint(evt);
+      const dx = point.x - dragShapeStartPoint.x;
+      const dy = point.y - dragShapeStartPoint.y;
+      if (dragShapeOriginals) {
+        selectedShapes.forEach((shape, i) => {
+          const orig = dragShapeOriginals[i];
+          if (!orig) return;
+          shape.start = { x: orig.start.x + dx, y: orig.start.y + dy };
+          shape.end = { x: orig.end.x + dx, y: orig.end.y + dy };
+          if (shape.type === "group" && shape.children && dragGroupChildrenOriginals) {
+            const origShapes = dragGroupChildrenOriginals.shapes || [];
+            (shape.children.shapes || []).forEach((s, j) => {
+              const o = origShapes[j];
+              if (o && o.start) s.start = { x: o.start.x + dx, y: o.start.y + dy };
+              if (o && o.end) s.end = { x: o.end.x + dx, y: o.end.y + dy };
+            });
+            const origTexts = dragGroupChildrenOriginals.texts || [];
+            (shape.children.texts || []).forEach((t, j) => {
+              const o = origTexts[j];
+              if (o) { t.x = o.x + dx; t.y = o.y + dy; }
+            });
+          }
+        });
+      }
+      if (dragTextOriginals) {
+        selectedTexts.forEach((t, i) => {
+          const orig = dragTextOriginals[i];
+          if (!orig) return;
+          t.x = orig.x + dx;
+          t.y = orig.y + dy;
+        });
+      }
+      updateBoardAppearance();
+    } else if (currentTool === "select" && activeSelectionBox) {
+      activeSelectionBox.end = getCanvasPoint(evt);
+      updateBoardAppearance();
+    }
+  }
+
+  function handlePointerUp(evt) {
+    if (!boardCanvas) return;
+    if (evt.pointerType === "touch") return; /* tablet: we use touch handlers instead */
+    try { boardCanvas.releasePointerCapture(evt.pointerId); } catch (_) {}
+    if (resizeState && currentTool === "select") {
+      resizeState = null;
+      isDrawing = false;
+      updateBoardAppearance();
+      return;
+    }
+    if ((currentTool === "shapes" || currentTool === "charts") && activeShape) {
+      const page = pages[currentPageIndex];
+      if (page) {
+        if (!page.shapes) page.shapes = [];
+        const a = { ...activeShape };
+        const dx = a.end.x - a.start.x;
+        const dy = a.end.y - a.start.y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        if (len >= 10) {
+          page.shapes.push(a);
+          currentTool = "select";
+          selectedShapes = [a];
+          selectedTexts = [];
+          toolButtons.forEach((btn) => {
+            const isActive = btn.getAttribute("data-tool") === "select";
+            btn.classList.toggle("tool-button--active", isActive);
+          });
+          if (propertiesContent) handleToolSelection("select");
+        }
+      }
+      activeShape = null;
+    }
+    if (currentTool === "select" && activeSelectionBox) {
+      selectedShapes = shapesInBox(activeSelectionBox);
+      selectedTexts = textsInBox(activeSelectionBox);
+      activeSelectionBox = null;
+      if (propertiesContent) handleToolSelection("select");
+    }
+    isDrawing = false;
+    isDraggingShape = false;
+    dragShapeStartPoint = null;
+    dragShapeOriginals = null;
+    dragGroupChildrenOriginals = null;
+    dragTextOriginals = null;
+    activeStroke = null;
+    activeShape = null;
+    updateBoardAppearance();
+  }
+
+  function handleEraserMove(evt) {
+    const point = getCanvasPoint(evt);
+    const page = pages[currentPageIndex];
+    if (!page) return;
+
+    page.strokes = page.strokes.filter((stroke) => {
+      return !stroke.points.some((p) => {
+        const dx = p.x - point.x;
+        const dy = p.y - point.y;
+        return Math.sqrt(dx * dx + dy * dy) <= eraserRadius;
+      });
+    });
+    if (page.shapes) {
+      const hitSelected = selectedShapes.length && page.shapes.some((shape) => {
+        if (!selectedShapes.includes(shape)) return false;
+        const { start, end } = shape;
+        if (!start || !end) return false;
+        const x1 = Math.min(start.x, end.x) - eraserRadius;
+        const y1 = Math.min(start.y, end.y) - eraserRadius;
+        const x2 = Math.max(start.x, end.x) + eraserRadius;
+        const y2 = Math.max(start.y, end.y) + eraserRadius;
+        return point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2;
+      });
+      if (hitSelected) {
+        page.shapes = page.shapes.filter((s) => !selectedShapes.includes(s));
+        selectedShapes = [];
+      } else {
+        page.shapes = page.shapes.filter((shape) => {
+          const { start, end } = shape;
+          if (!start || !end) return true;
+          const x1 = Math.min(start.x, end.x) - eraserRadius;
+          const y1 = Math.min(start.y, end.y) - eraserRadius;
+          const x2 = Math.max(start.x, end.x) + eraserRadius;
+          const y2 = Math.max(start.y, end.y) + eraserRadius;
+          return !(
+            point.x >= x1 &&
+            point.x <= x2 &&
+            point.y >= y1 &&
+            point.y <= y2
+          );
+        });
+      }
+    }
+    if (page.texts) {
+      const hitSelectedText = selectedTexts.length && page.texts.some((t) => {
+        if (!selectedTexts.includes(t)) return false;
+        const b = getTextBounds(t);
+        const pad = eraserRadius;
+        return point.x >= b.x - pad && point.x <= b.x + b.w + pad && point.y >= b.y - pad && point.y <= b.y + b.h + pad;
+      });
+      if (hitSelectedText) {
+        page.texts = page.texts.filter((t) => !selectedTexts.includes(t));
+        selectedTexts = [];
+      } else {
+        page.texts = page.texts.filter((item) => {
+          const b = getTextBounds(item);
+          const pad = eraserRadius;
+          return !(point.x >= b.x - pad && point.x <= b.x + b.w + pad && point.y >= b.y - pad && point.y <= b.y + b.h + pad);
+        });
+      }
+    }
+    updateBoardAppearance();
+  }
+
+  function ensureImageFileInput() {
+    if (imageFileInput) return;
+    imageFileInput = document.createElement("input");
+    imageFileInput.type = "file";
+    imageFileInput.accept = "image/*";
+    imageFileInput.style.display = "none";
+    document.body.appendChild(imageFileInput);
+    imageFileInput.addEventListener("change", () => {
+      const file = imageFileInput?.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result;
+        if (typeof dataUrl !== "string") return;
+        const page = pages[currentPageIndex];
+        if (!page) return;
+        page.background = { dataUrl };
+        updateBoardAppearance();
+      };
+      reader.readAsDataURL(file);
+      imageFileInput.value = "";
+    });
+  }
+
+  function ensureShapeImageFileInput() {
+    if (shapeImageFileInput) return;
+    shapeImageFileInput = document.createElement("input");
+    shapeImageFileInput.type = "file";
+    shapeImageFileInput.accept = "image/*";
+    shapeImageFileInput.style.display = "none";
+    document.body.appendChild(shapeImageFileInput);
+    shapeImageFileInput.addEventListener("change", () => {
+      const file = shapeImageFileInput?.files?.[0];
+      if (!file || !boardCanvas) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result;
+        if (typeof dataUrl !== "string") return;
+        const page = pages[currentPageIndex];
+        if (!page) return;
+        if (!page.shapes) page.shapes = [];
+        const scale = window.devicePixelRatio || 1;
+        const logicalW = boardCanvas.width / (scale * zoom);
+        const logicalH = boardCanvas.height / (scale * zoom);
+        const cx = logicalW / 2;
+        const cy = logicalH / 2;
+        const halfW = 150;
+        const halfH = 150;
+        const newShape = {
+          type: "image",
+          color: "#ffffff",
+          width: 1,
+          fillMode: "solid",
+          dataUrl,
+          start: { x: cx - halfW, y: cy - halfH },
+          end: { x: cx + halfW, y: cy + halfH },
+        };
+        page.shapes.push(newShape);
+        currentTool = "select";
+        selectedShapes = [newShape];
+        selectedTexts = [];
+        toolButtons.forEach((btn) => {
+          const isActive = btn.getAttribute("data-tool") === "select";
+          btn.classList.toggle("tool-button--active", isActive);
+        });
+        updateBoardAppearance();
+        if (propertiesContent) handleToolSelection("select");
+      };
+      reader.readAsDataURL(file);
+      shapeImageFileInput.value = "";
+    });
+  }
+
+  if (boardTypeToggle) {
+    boardTypeToggle.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const type = target.getAttribute("data-board");
+      if (!type) return;
+      setBoardType(type);
+    });
+  }
+
+  zoomInButton?.addEventListener("click", () => {
+    setZoom(zoom + 0.1);
+  });
+
+  zoomOutButton?.addEventListener("click", () => {
+    setZoom(zoom - 0.1);
+  });
+
+  addPageButton?.addEventListener("click", () => {
+    addNewPage();
+  });
+
+  document.getElementById("undoButton")?.addEventListener("click", undo);
+  document.getElementById("redoButton")?.addEventListener("click", redo);
+
+  (function setupExportDropdown() {
+    const dropdown = document.getElementById("exportDropdown");
+    const exportBtn = document.getElementById("exportButton");
+    const menu = document.getElementById("exportMenu");
+    if (!dropdown || !exportBtn || !menu) return;
+    exportBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle("is-open");
+      menu.setAttribute("aria-hidden", dropdown.classList.contains("is-open") ? "false" : "true");
+    });
+    document.addEventListener("click", () => {
+      dropdown.classList.remove("is-open");
+      menu.setAttribute("aria-hidden", "true");
+    });
+    dropdown.addEventListener("click", (e) => e.stopPropagation());
+    document.getElementById("exportFullPage")?.addEventListener("click", () => {
+      dropdown.classList.remove("is-open");
+      exportPageAsPNG();
+    });
+    document.getElementById("exportCurrentView")?.addEventListener("click", () => {
+      dropdown.classList.remove("is-open");
+      exportCurrentViewAsPNG();
+    });
+    document.getElementById("exportSelection")?.addEventListener("click", () => {
+      dropdown.classList.remove("is-open");
+      exportSelectionAsPNG();
+    });
+    document.getElementById("exportPDF")?.addEventListener("click", () => {
+      dropdown.classList.remove("is-open");
+      exportToPDF();
+    });
+  })();
+
+  zoomResetButton?.addEventListener("click", () => {
+    setZoom(1);
+  });
+
+  const clearPageConfirmEl = document.getElementById("clearPageConfirm");
+  const clearPageCancelBtn = document.getElementById("clearPageCancel");
+  const clearPageConfirmBtn = document.getElementById("clearPageConfirmBtn");
+  const deletePageButton = document.getElementById("deletePageButton");
+  const deletePageConfirmEl = document.getElementById("deletePageConfirm");
+  const deletePageCancelBtn = document.getElementById("deletePageCancel");
+  const deletePageConfirmBtn = document.getElementById("deletePageConfirmBtn");
+
+  function clearCurrentPage() {
+    const page = pages[currentPageIndex];
+    if (!page) return;
+    pushUndo();
+    page.strokes = [];
+    page.shapes = [];
+    page.texts = [];
+    if (page.background && page.background.dataUrl) {
+      imageCache.delete(page.background.dataUrl);
+    }
+    page.background = null;
+    selectedShapes = [];
+    selectedTexts = [];
+    if (clearPageConfirmEl) {
+      clearPageConfirmEl.classList.remove("is-visible");
+      clearPageConfirmEl.setAttribute("aria-hidden", "true");
+    }
+    updateBoardAppearance();
+    if (currentTool === "select" && propertiesContent) handleToolSelection("select");
+  }
+
+  function hideClearConfirm() {
+    if (clearPageConfirmEl) {
+      clearPageConfirmEl.classList.remove("is-visible");
+      clearPageConfirmEl.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  document.getElementById("clearPageButton")?.addEventListener("click", () => {
+    if (clearPageConfirmEl) {
+      clearPageConfirmEl.classList.add("is-visible");
+      clearPageConfirmEl.setAttribute("aria-hidden", "false");
+    }
+  });
+
+  clearPageCancelBtn?.addEventListener("click", hideClearConfirm);
+  clearPageConfirmBtn?.addEventListener("click", clearCurrentPage);
+
+  deletePageButton?.addEventListener("click", () => {
+    if (!deletePageConfirmEl) return;
+    if (pages.length <= 1) return;
+    deletePageConfirmEl.classList.add("is-visible");
+    deletePageConfirmEl.setAttribute("aria-hidden", "false");
+  });
+
+  deletePageCancelBtn?.addEventListener("click", () => {
+    if (!deletePageConfirmEl) return;
+    deletePageConfirmEl.classList.remove("is-visible");
+    deletePageConfirmEl.setAttribute("aria-hidden", "true");
+  });
+
+  deletePageConfirmBtn?.addEventListener("click", () => {
+    if (!deletePageConfirmEl) return;
+    deletePage(currentPageIndex);
+    deletePageConfirmEl.classList.remove("is-visible");
+    deletePageConfirmEl.setAttribute("aria-hidden", "true");
+  });
+
+  syncPageStrip();
+
+  pagesStrip?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const thumb = target.closest(".page-thumbnail");
+    if (thumb) {
+      const idx = Number(thumb.dataset.index);
+      if (!Number.isNaN(idx)) selectPage(idx);
+    }
+  });
+
+  if (toggleLeftPanelButton && leftPanel) {
+    toggleLeftPanelButton.addEventListener("click", () => {
+      const hidden = leftPanel.classList.toggle("is-hidden");
+      toggleLeftPanelButton.textContent = hidden ? "Show tools" : "Toggle tools";
+      updateLayoutForPanels();
+      resizeCanvas();
+      updateBoardAppearance();
+    });
+  }
+
+  if (toggleRightPanelButton && rightPanel) {
+    toggleRightPanelButton.addEventListener("click", () => {
+      const hidden = rightPanel.classList.toggle("is-hidden");
+      toggleRightPanelButton.textContent = hidden ? "Show options" : "Toggle options";
+      updateLayoutForPanels();
+      resizeCanvas();
+      updateBoardAppearance();
+    });
+  }
+
+  function isFullScreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+  }
+  function enterFullScreen() {
+    const el = appRoot || document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+  }
+  function exitFullScreen() {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+    else if (document.msExitFullscreen) document.msExitFullscreen();
+  }
+  function updateFullScreenButton() {
+    if (!fullScreenButton) return;
+    const full = isFullScreen();
+    fullScreenButton.textContent = full ? "Exit full screen" : "Full screen";
+    fullScreenButton.title = full ? "Exit full screen" : "Enter full screen";
+    resizeCanvas();
+    updateBoardAppearance();
+  }
+  if (fullScreenButton && appRoot) {
+    fullScreenButton.addEventListener("click", () => {
+      if (isFullScreen()) exitFullScreen();
+      else enterFullScreen();
+    });
+    document.addEventListener("fullscreenchange", updateFullScreenButton);
+    document.addEventListener("webkitfullscreenchange", updateFullScreenButton);
+    document.addEventListener("mozfullscreenchange", updateFullScreenButton);
+    document.addEventListener("MSFullscreenChange", updateFullScreenButton);
+  }
+
+  toolButtons.forEach((btn) => {
+    const tool = btn.getAttribute("data-tool");
+    if (tool) {
+      const label = btn.textContent.trim();
+      if (!btn.hasAttribute("title")) {
+        btn.setAttribute("title", label || tool);
+      }
+    }
+    btn.addEventListener("click", () => {
+      if (!tool) return;
+      handleToolSelection(tool);
+    });
+  });
+
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    updateBoardAppearance();
+  });
+
+  document.addEventListener("keydown", (evt) => {
+    if ((evt.key === "Delete" || evt.key === "Backspace") && (selectedShapes.length > 0 || selectedTexts.length > 0)) {
+      const target = evt.target;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) return;
+      evt.preventDefault();
+      deleteSelected();
+    }
+  });
+
+  function syntheticPointerEvt(touch) {
+    return { clientX: touch.clientX, clientY: touch.clientY, pointerId: touch.identifier };
+  }
+  if (boardCanvas) {
+    boardCanvas.addEventListener("pointerdown", handlePointerDown);
+    boardCanvas.addEventListener("pointermove", handlePointerMove);
+    boardCanvas.addEventListener("pointerup", handlePointerUp);
+    boardCanvas.addEventListener("pointercancel", handlePointerUp);
+    var touchOpt = { passive: false, capture: true };
+    var wrapper = boardCanvas.closest(".canvas-wrapper");
+    function isOnCanvasArea(el) {
+      return el === boardCanvas || (wrapper && wrapper.contains(el));
+    }
+    function onTouchStart(e) {
+      if (!isOnCanvasArea(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.touches.length === 2) {
+        // start pinch-zoom
+        var t1 = e.touches[0];
+        var t2 = e.touches[1];
+        var dx = t2.clientX - t1.clientX;
+        var dy = t2.clientY - t1.clientY;
+        pinchStartDistance = Math.sqrt(dx * dx + dy * dy) || null;
+        pinchStartZoom = zoom;
+        activeTouchId = null; // disable drawing while pinching
+        return;
+      }
+      if (e.touches.length === 1) {
+        pinchStartDistance = null;
+        var t = e.touches[0];
+        activeTouchId = t.identifier;
+        handlePointerDown(syntheticPointerEvt(t));
+      }
+    }
+    function onTouchMove(e) {
+      if (!isOnCanvasArea(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.touches.length === 2 && pinchStartDistance != null) {
+        var t1 = e.touches[0];
+        var t2 = e.touches[1];
+        var dx = t2.clientX - t1.clientX;
+        var dy = t2.clientY - t1.clientY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0) {
+          var factor = dist / pinchStartDistance;
+          setZoom(pinchStartZoom * factor);
+        }
+        return;
+      }
+      if (activeTouchId == null) return;
+      var t = Array.from(e.touches).find(function (x) { return x.identifier === activeTouchId; });
+      if (!t) return;
+      handlePointerMove(syntheticPointerEvt(t));
+    }
+    function onTouchEnd(e) {
+      if (!isOnCanvasArea(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.touches.length < 2) {
+        pinchStartDistance = null;
+      }
+      var t = Array.from(e.changedTouches || []).find(function (x) { return x.identifier === activeTouchId; });
+      if (t && activeTouchId != null) {
+        handlePointerUp(syntheticPointerEvt(t));
+        try { boardCanvas.releasePointerCapture(t.identifier); } catch (_) {}
+      }
+      if (e.touches.length === 0) {
+        activeTouchId = null;
+      }
+    }
+    boardCanvas.addEventListener("touchstart", onTouchStart, touchOpt);
+    boardCanvas.addEventListener("touchmove", onTouchMove, touchOpt);
+    boardCanvas.addEventListener("touchend", onTouchEnd, touchOpt);
+    boardCanvas.addEventListener("touchcancel", onTouchEnd, touchOpt);
+    if (wrapper && wrapper !== boardCanvas) {
+      wrapper.addEventListener("touchstart", onTouchStart, touchOpt);
+      wrapper.addEventListener("touchmove", onTouchMove, touchOpt);
+      wrapper.addEventListener("touchend", onTouchEnd, touchOpt);
+      wrapper.addEventListener("touchcancel", onTouchEnd, touchOpt);
+    }
+  }
+
+  resizeCanvas();
+  setBoardType("white");
+  updateZoomLabel();
+  handleToolSelection("select");
+})();
+
+
+</script>
+  </body>
+</html>
+
+
